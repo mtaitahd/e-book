@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title>SRMS - Login</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="bootstrap/bootstrap.css">
+  <link rel="stylesheet" href="fontawesome/all.css">
+  <link rel="stylesheet" href="fontawesome/all.min.css">
+  <link rel="stylesheet" href="fontawesome/fontawesome.min.css">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+  
+  <style>
+    body {
+      background: url('images/cover.jpg');
+      background-size: cover;
+      font-family: 'Nunito', -webkit-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      overflow: scroll;
+    }
+
+    .login {
+      justify-content: center;
+      align-items: center;
+      height: 130vh;
+      background-color: black;
+    }
+
+    .shadow {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    #headers, #content {
+      float: left;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgb(21, 18, 68);
+    }
+
+    #headers {
+      width: 30%;
+      background-color: rgb(105, 105, 141);
+      text-align: center;
+      height: 450px;
+    }
+
+    h3 {
+      color: white;
+      font-family: 'Nunito', -webkit-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    #headers img {
+      width: 100%;
+      max-width: 500px;
+    }
+
+    #contents {
+      width: 40%;
+      background-color: white;
+      padding: 30px;
+      height: 450px;
+      box-shadow: 0 4px 8px rgb(21, 18, 68);
+    }
+
+    #input {
+      border: 3px solid rgb(105, 105, 141);
+      width: 100%;
+      padding: 18px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 15px;
+      background-color: rgb(105, 105, 141);
+      border: none;
+      color: white;
+      font-size: 16px;
+    }
+
+    a {
+      text-decoration: none;
+      color: rgb(105, 105, 141);
+    }
+
+    a:hover {
+      color: rgb(105, 105, 141);
+    }
+
+    @media screen and (max-width: 1024px) {
+      #headers { width: 50%; padding: 20px; }
+      #contents { width: 60%; }
+      #input { width: 100%; }
+    }
+
+    @media screen and (max-width: 768px) {
+      #headers { width: 80%; padding: 10px; }
+      #contents { width: 80%; }
+      h3 { font-size: 24px; font-family: 'Nunito', -webkit-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+      #input { width: 100%; margin-bottom: 15px; }
+    }
+
+    @media screen and (max-width: 576px) {
+      #headers, #contents { width: 95%; padding: 15px; }
+      #headers { height: 380px; }
+      #contents { height: 480px; }
+      h3 { font-size: 20px; font-family: 'Nunito', -webkit-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+      #input { margin-bottom: 20px; }
+      .login { flex-direction: column; }
+      .btn-warning { font-size: 14px; padding: 12px; }
+    }
+  </style>
+</head>
+
+<body>
+  <script src="js/sweetalert.min.js"></script>
+
+  <div class="login shadow container-fluid mx-auto flex justify-center items-center">
+
+    <div id="headers">
+      <h3 style="font-family: 'Nunito', -webkit-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">KISOSORA PRIMARY SCHOOL</h3>
+      <img src="images/student_cover.png" alt="Logo">
+      <a href="#" class="no-underline text-black text-lg text-light">
+        location: Tanga <i class="fa-solid fa-arrow-right"></i> Tangamjini
+        <i class="fa-solid fa-arrow-right"></i> Chumbageni <i class="fa-solid fa-arrow-right"></i> Kisosora.
+      </a><br>
+      <a href="#" class="no-underline text-black text-lg text-light">
+        <i style="color: white" class="fa-brands fa-facebook"></i>
+        <i style="color: white" class="fa-brands fa-instagram"></i>
+        <i style="color: white" class="fa-brands fa-youtube"></i>
+        <i style="color: white" class="fa-brands fa-whatsapp"></i>
+      </a>
+    </div>
+
+    <div id="contents">
+      <form action="index.html" method="post">
+        <p class="text-gray-800 font-medium text-center text-lg font-bold">Login</p>
+        <label class="block text-sm text-gray-00" for="username">username:</label>
+        <input type="text" name="username" id="input" placeholder="Hans code" required><br>
+        <label class="block text-sm text-gray-00" for="password">password:</label>
+        <input type="password" name="password" id="input" placeholder="************" required><br>
+        <button type="submit" name="login"
+          style="background-color:rgb(105, 105, 141);" class="btn btn-primary text-light p-3">Login</button><br><br>
+        <a class="fs-6 text-dark inline-block right-0 align-baseline font-bold text-sm text-500 hover:text-blue-800" href="#">
+          Forgot Password?
+        </a><br>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,268 @@
+/* ============================================================
+   Premium 3D book covers (catalogue cards + details gallery).
+   CSS-only: box built from front / back / spine / fore-edge /
+   top faces inside a perspective scene.
+
+   Geometry (book box width W, height H, depth D = --bk3d-d):
+     front  : translateZ(+D/2)
+     back   : translateZ(-D/2)
+     spine  : plane x=0,   z in [-D/2, D/2]
+     fore   : plane x=W,   z in [-D/2, D/2]
+     top    : plane y=0,   z in [-D/2, D/2]
+   A positive rotateY(24deg) swings the LEFT edge toward the
+   viewer, so the spine + front cover are the visible faces and
+   the fore-edge recedes. Hover reduces the angle and lifts the
+   book instead of spinning it.
+   ============================================================ */
+
+.bk3d {
+    --bk3d-d: 15px;
+    --bk3d-ry: 24deg;
+    --bk3d-ry-hover: 13deg;
+    --bk3d-w: 66%;
+
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    perspective: 1100px;
+    perspective-origin: 50% 44%;
+}
+
+/* ---- Scene: the cast shadow lives outside the 3D book ---- */
+.bk3d__shadow {
+    position: absolute;
+    left: 13%;
+    right: 13%;
+    bottom: 3%;
+    height: 7%;
+    background: radial-gradient(50% 50% at 50% 50%, rgba(8, 12, 24, .42), rgba(8, 12, 24, 0) 72%);
+    filter: blur(5px);
+    opacity: .9;
+    transition: transform .5s cubic-bezier(.2, .65, .25, 1), opacity .5s ease;
+    pointer-events: none;
+}
+
+/* ---- The book itself ---- */
+.bk3d__book {
+    position: relative;
+    flex: none;
+    width: var(--bk3d-w);
+    aspect-ratio: 3 / 4;
+    transform-style: preserve-3d;
+    transform: rotateX(-2deg) rotateY(var(--bk3d-ry));
+    transition: transform .5s cubic-bezier(.2, .65, .25, 1);
+    will-change: transform;
+}
+
+.bk3d__face {
+    position: absolute;
+    left: 0;
+    top: 0;
+    overflow: hidden;
+}
+
+.bk3d__front {
+    width: 100%;
+    height: 100%;
+    transform: translateZ(calc(var(--bk3d-d) / 2));
+    background: #f4f6f6;
+    border-radius: 2px 3px 3px 2px;
+    box-shadow: inset 0 0 0 1px rgba(15, 17, 17, .07);
+}
+
+.bk3d__front img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border: 0;
+    box-shadow: none;
+    border-radius: 2px 3px 3px 2px;
+}
+
+/* Binding shadow along the spine edge + gloss across the cover. */
+.bk3d__front::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: linear-gradient(90deg, rgba(0, 0, 0, .3), rgba(0, 0, 0, .08) 13%, rgba(0, 0, 0, 0) 32%);
+    pointer-events: none;
+}
+
+.bk3d__gloss {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    background: linear-gradient(112deg, rgba(255, 255, 255, 0) 32%, rgba(255, 255, 255, .14) 46%, rgba(255, 255, 255, .03) 57%, rgba(255, 255, 255, 0) 68%);
+    pointer-events: none;
+}
+
+.bk3d__back {
+    width: 100%;
+    height: 100%;
+    transform: translateZ(calc(var(--bk3d-d) / -2));
+    background: linear-gradient(160deg, #1d2942, #121a2b);
+}
+
+.bk3d__spine {
+    width: var(--bk3d-d);
+    height: 100%;
+    transform: translateX(calc(var(--bk3d-d) / -2)) rotateY(-90deg);
+    background-color: #16202f;
+    background-image:
+        linear-gradient(90deg, rgba(0, 0, 0, .52), rgba(0, 0, 0, .16) 45%, rgba(0, 0, 0, .2) 55%, rgba(0, 0, 0, .46)),
+        var(--bk3d-cover, none);
+    background-size: 100% 100%, auto 100%;
+    background-position: center, left center;
+    background-repeat: no-repeat, no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bk3d__spine-label {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: .62rem;
+    font-weight: var(--ebs-fw-heading);
+    letter-spacing: .05em;
+    color: rgba(255, 255, 255, .9);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .65);
+    max-height: calc(100% - 18px);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding: 4px 0;
+}
+
+/* Page stack on the fore-edge (right side) and top edge. */
+.bk3d__fore {
+    right: 0;
+    left: auto;
+    width: var(--bk3d-d);
+    height: 100%;
+    transform: translateX(calc(var(--bk3d-d) / 2)) rotateY(90deg);
+    background:
+        linear-gradient(180deg, rgba(0, 0, 0, .18), rgba(0, 0, 0, 0) 22%, rgba(0, 0, 0, 0) 78%, rgba(0, 0, 0, .22)),
+        repeating-linear-gradient(90deg, #fffdf7 0 2px, #e7e2d5 2px 3.4px);
+}
+
+.bk3d__top {
+    width: 100%;
+    height: var(--bk3d-d);
+    transform: translateY(calc(var(--bk3d-d) / -2)) rotateX(90deg);
+    background:
+        linear-gradient(90deg, rgba(0, 0, 0, .26), rgba(0, 0, 0, 0) 18%, rgba(0, 0, 0, 0) 82%, rgba(0, 0, 0, .2)),
+        repeating-linear-gradient(180deg, #fffdf7 0 2px, #e7e2d5 2px 3.6px);
+}
+
+/* ---- Neutral placeholder "generated cover" ---- */
+.bk3d__ph {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 14% 12%;
+    text-align: center;
+    background: linear-gradient(160deg, #f8faf9 0%, #e8eceb 100%);
+    color: #8c9196;
+}
+
+.bk3d__ph-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: .78rem;
+    font-weight: var(--ebs-fw-heading);
+    line-height: 1.3;
+    color: var(--ebs-text);
+}
+
+.bk3d__ph-sub {
+    font-size: .64rem;
+    font-weight: var(--ebs-fw-ui);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+/* ---- Catalogue card variant (fills the square cover tile) ---- */
+.book-card__cover {
+    aspect-ratio: 1 / 1;
+}
+
+.bk3d--card {
+    position: absolute;
+    inset: 0;
+    height: auto;
+}
+
+/* ---- Details gallery variant ---- */
+.bk3d--detail {
+    --bk3d-d: 22px;
+    --bk3d-w: 78%;
+    aspect-ratio: 3 / 4;
+    height: auto;
+    perspective: 1400px;
+}
+
+.bk3d--detail .bk3d__ph-title {
+    font-size: 1.02rem;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+}
+
+/* The old flat gallery image styling must not bleed onto the 3D faces. */
+.detail-gallery .bk3d__front img {
+    border: 0;
+    box-shadow: none;
+}
+
+/* ---- Hover / focus: tilt open, lift, soften the shadow ---- */
+@media (hover: hover) {
+    .bk3d:hover .bk3d__book,
+    .bk3d:focus-within .bk3d__book,
+    .book-card:hover .bk3d__book,
+    .book-card:focus-within .bk3d__book {
+        transform: translateY(-6px) rotateX(-2deg) rotateY(var(--bk3d-ry-hover));
+    }
+
+    .bk3d:hover .bk3d__shadow,
+    .book-card:hover .bk3d__shadow {
+        transform: scale(1.07);
+        opacity: .6;
+    }
+}
+
+/* ---- Small screens: calmer angle, thinner spine, no overflow ---- */
+@media (max-width: 620px) {
+    .bk3d {
+        --bk3d-d: 12px;
+        --bk3d-ry: 20deg;
+        --bk3d-ry-hover: 14deg;
+        --bk3d-w: 70%;
+    }
+
+    .bk3d--detail {
+        --bk3d-d: 17px;
+        --bk3d-w: 80%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bk3d__book,
+    .bk3d__shadow {
+        transition: none;
+    }
+}

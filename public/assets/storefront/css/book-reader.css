@@ -1,0 +1,393 @@
+/* ============================================================
+   Open-book PDF reader — spread presentation, page-turn leaf,
+   table of contents card, settings popover, progress track.
+
+   The floating pill chrome (toolbar, stage clearance, zoom,
+   fullscreen) is styled inline in reader.blade.php; this file
+   only carries the book-spread and floating-panel pieces.
+   ============================================================ */
+
+[hidden] { display: none !important; }
+
+/* ---- Top bar extras: TOC button beside Back ---- */
+.reader-head__side {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+}
+.reader-head__side--start { justify-self: start; }
+.reader-head__side--end { justify-self: end; gap: 2px; }
+
+.reader-tocbtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 10px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: #cbd5e1;
+    border-radius: 999px;
+    font-weight: var(--ebs-fw-ui);
+    cursor: pointer;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+.reader-tocbtn:hover { background: rgba(255, 255, 255, .1); border-color: rgba(255, 255, 255, .16); color: #fff; }
+.reader-tocbtn:focus-visible { outline: 2px solid var(--ebs-orange); outline-offset: 2px; }
+
+/* ---- The open book: one physical object, two warm-paper pages,
+       centre binding, ambient shadow on the dark environment ---- */
+.bkrd-book {
+    --bkrd-pw: 480px;
+    --bkrd-ph: 640px;
+
+    position: relative;
+    display: flex;
+    flex: none;
+    margin: auto;
+    gap: 0;
+    perspective: 2200px;
+    perspective-origin: 50% 50%;
+    border-radius: 7px;
+    box-shadow:
+        0 2px 0 rgba(255, 255, 255, .05),
+        0 22px 44px -10px rgba(0, 0, 0, .55),
+        0 56px 90px -28px rgba(0, 0, 0, .5);
+}
+
+.bkrd-page {
+    position: relative;
+    z-index: 1;
+    flex: none;
+    width: var(--bkrd-pw);
+    height: var(--bkrd-ph);
+    background: #f8f5ec;
+    overflow: hidden;
+    border-radius: 7px 0 0 7px;
+    box-shadow: inset 0 0 0 1px rgba(20, 16, 8, .06);
+}
+.bkrd-page--r { border-radius: 0 7px 7px 0; }
+
+/* Ivory paper tint laid over the rendered page (multiply keeps ink dark). */
+.bkrd-page::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: #f8f5ec;
+    mix-blend-mode: multiply;
+    opacity: .8;
+    pointer-events: none;
+}
+
+/* Paper curvature: darker where the sheet bends into the binding,
+   a whisper of shading along the outer edge. */
+.bkrd-page::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+}
+.bkrd-page--l::after {
+    background:
+        linear-gradient(to right, rgba(18, 14, 6, .08), transparent 5%),
+        linear-gradient(to left, rgba(18, 14, 6, .2), rgba(18, 14, 6, .05) 6%, transparent 24%);
+}
+.bkrd-page--r::after {
+    background:
+        linear-gradient(to left, rgba(18, 14, 6, .08), transparent 5%),
+        linear-gradient(to right, rgba(18, 14, 6, .2), rgba(18, 14, 6, .05) 6%, transparent 24%);
+}
+
+.bkrd-img {
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    display: block;
+    border: 0;
+    -webkit-user-drag: none;
+    user-select: none;
+}
+
+/* Centre binding: soft dark trough with a faint highlight seam. */
+.bkrd-gutter {
+    position: absolute;
+    z-index: 4;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 34px;
+    transform: translateX(-50%);
+    background:
+        linear-gradient(90deg,
+            rgba(6, 9, 18, 0) 0%,
+            rgba(6, 9, 18, .18) 32%,
+            rgba(6, 9, 18, .46) 50%,
+            rgba(6, 9, 18, .18) 68%,
+            rgba(6, 9, 18, 0) 100%);
+    pointer-events: none;
+}
+.bkrd-gutter::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    background: linear-gradient(to bottom,
+        transparent,
+        rgba(255, 255, 255, .09) 10%,
+        rgba(255, 255, 255, .09) 90%,
+        transparent);
+}
+
+/* Single-page mode: one column, no gutter, leaf pivots on its left edge. */
+.bkrd-book--single .bkrd-page--r,
+.bkrd-book--single .bkrd-gutter { display: none; }
+.bkrd-book--single .bkrd-page { border-radius: 7px; }
+
+/* The turning leaf: front/back faces straddling a hairline of thickness. */
+.bkrd-leaf {
+    position: absolute;
+    z-index: 5;
+    top: 0;
+    left: var(--bkrd-pw);
+    width: var(--bkrd-pw);
+    height: var(--bkrd-ph);
+    transform-style: preserve-3d;
+    transform-origin: 0% 50%;
+    will-change: transform;
+    pointer-events: none;
+}
+.bkrd-book--single .bkrd-leaf { left: 0; }
+
+.bkrd-leaf__side {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background: #f8f5ec;
+    backface-visibility: hidden;
+}
+.bkrd-leaf__front { transform: translateZ(.4px); }
+.bkrd-leaf__back { transform: rotateY(180deg) translateZ(.4px); }
+
+/* Same ivory tint as the resting pages, so the flip never flashes white. */
+.bkrd-leaf__side::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: #f8f5ec;
+    mix-blend-mode: multiply;
+    opacity: .8;
+    pointer-events: none;
+}
+
+/* Binding shadow baked into each face (static depth cue). */
+.bkrd-leaf__front::after,
+.bkrd-leaf__back::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+}
+.bkrd-leaf__front::after {
+    background: linear-gradient(90deg,
+        rgba(0, 0, 0, .34), rgba(0, 0, 0, .1) 14%, rgba(0, 0, 0, 0) 34%);
+}
+.bkrd-leaf__back::after {
+    background: linear-gradient(270deg,
+        rgba(0, 0, 0, .3), rgba(0, 0, 0, .09) 16%, rgba(0, 0, 0, 0) 36%);
+}
+
+/* Dynamic flip shading, driven by JS during the animation. */
+.bkrd-leaf__sh {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    background: linear-gradient(90deg,
+        rgba(8, 12, 24, .5), rgba(8, 12, 24, .18) 34%,
+        rgba(8, 12, 24, .07) 62%, rgba(8, 12, 24, .3));
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* No scrollbars (or scroll jumps) while a leaf is mid-air. */
+.reader-canvas-wrap.bkrd-flipping { overflow: hidden; }
+
+/* ---- Table of contents: floating card under the pill toolbar ---- */
+.reader-toc {
+    position: fixed;
+    z-index: 110;
+    top: 78px;
+    left: 14px;
+    bottom: auto;
+    max-height: min(62vh, 480px);
+    width: min(330px, calc(100vw - 28px));
+    display: flex;
+    flex-direction: column;
+    background: rgba(13, 20, 36, .97);
+    border: 1px solid rgba(255, 255, 255, .14);
+    border-radius: 14px;
+    box-shadow: 0 24px 54px rgba(0, 0, 0, .55);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    overflow: hidden;
+    animation: reader-toc-in .18s ease;
+}
+@keyframes reader-toc-in {
+    from { transform: translateY(-8px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.reader-toc__head {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 13px 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, .1);
+    color: #f1f5f9;
+    font-size: .92rem;
+}
+.reader-toc__close {
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+    background: rgba(255, 255, 255, .07);
+    border: 1px solid rgba(255, 255, 255, .14);
+    color: #e2e8f0;
+    font-size: 1.05rem;
+    line-height: 1;
+    cursor: pointer;
+}
+.reader-toc__close:hover { background: rgba(255, 255, 255, .14); border-color: var(--ebs-orange); }
+.reader-toc__close:focus-visible { outline: 2px solid var(--ebs-orange); outline-offset: 2px; }
+
+.reader-toc__list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    margin: 0;
+    padding: 8px 0 18px;
+    list-style: none;
+}
+.reader-toc__item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: 0;
+    border-left: 3px solid transparent;
+    color: #cbd5e1;
+    padding: 9px 16px;
+    font-size: .88rem;
+    line-height: 1.4;
+    cursor: pointer;
+    transition: background .12s ease, color .12s ease, border-color .12s ease;
+}
+.reader-toc__item:hover {
+    background: rgba(255, 255, 255, .07);
+    border-left-color: var(--ebs-orange);
+    color: #fff;
+}
+.reader-toc__item:focus-visible { outline: 2px solid var(--ebs-orange); outline-offset: -2px; }
+
+/* ---- Settings popover: anchored under the pill toolbar, right side ---- */
+.reader-settings {
+    position: fixed;
+    z-index: 130;
+    top: 78px;
+    right: 14px;
+    bottom: auto;
+    width: min(300px, calc(100vw - 28px));
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+    background: rgba(13, 20, 36, .97);
+    border: 1px solid rgba(255, 255, 255, .14);
+    border-radius: 14px;
+    box-shadow: 0 24px 54px rgba(0, 0, 0, .55);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    color: #e2e8f0;
+    font-size: .86rem;
+}
+.reader-settings__row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.reader-settings__label { color: #cbd5e1; font-weight: var(--ebs-fw-ui); }
+
+.reader-jump {
+    width: 76px;
+    padding: 7px 9px;
+    border-radius: 7px;
+    border: 1px solid rgba(255, 255, 255, .22);
+    background: rgba(255, 255, 255, .07);
+    color: #fff;
+    font-size: .86rem;
+}
+.reader-jump:focus-visible { outline: 2px solid var(--ebs-orange); outline-offset: 1px; }
+
+.reader-settings__row--views label {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid rgba(255, 255, 255, .13);
+    cursor: pointer;
+    font-size: .8rem;
+}
+.reader-settings__row--views label:has(input:checked) {
+    background: rgba(255, 153, 0, .16);
+    border-color: var(--ebs-orange);
+    color: #fff;
+}
+.reader-settings__row--views input { accent-color: var(--ebs-orange); }
+
+.reader-ctrl--sm { padding: 7px 12px; font-size: .82rem; }
+
+/* ---- Reading progress: slim track inside the bottom pill ---- */
+.reader-progress {
+    display: block;
+    width: min(190px, 26vw);
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .16);
+    overflow: hidden;
+}
+.reader-progress__fill {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--ebs-orange);
+    transition: width .35s ease;
+}
+
+.reader-save {
+    color: rgba(226, 232, 240, .62);
+    font-size: .72rem;
+    min-width: 54px;
+    white-space: nowrap;
+}
+
+/* ---- Small screens ---- */
+@media (max-width: 768px) {
+    .reader-tocbtn { padding: 0 8px; height: 30px; }
+    .reader-toc { top: 68px; left: 8px; max-height: min(56vh, 420px); }
+    .reader-settings { top: 68px; right: 8px; }
+    .reader-progress { width: min(120px, 24vw); }
+    .reader-save { display: none; }
+    .bkrd-book { perspective: 1500px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .reader-toc { animation: none; }
+    .reader-progress__fill { transition: none; }
+}

@@ -1,0 +1,993 @@
+/* ==========================================================================
+   Native online reader (E-Books) — physical-book experience
+   A premium floating toolbar, large circular page-turn arrows, a two-page
+   open book with a real center spine and 3D page flips, and a compact
+   reading-progress track — on a dark navy reading stage.
+
+   Structure:
+     .orp            full-viewport shell (site chrome is hidden)
+     .orp-head       floating premium toolbar (centered, rounded)
+     .orp-body       the stage; side arrows flank the book, panels overlay
+     .orp-arrow      large circular previous/next arrows beside the book
+     .orp-stage      perspective room that owns the book
+     .orp-pages      the open book (spread geometry set by JS)
+     .orp-page       one paginated leaf; --left/--right pin spread sides
+     .orp-cover      the closed front cover until the reader opens it
+     .orp-foot       floating bottom bar: chapters  reading-progress track
+
+   The pagination engine measures .orp-page__inner against its own height, so
+   .orp-page must keep a fixed pixel height (set through --orp-page-height by
+   online-reader.js) and .orp-page__inner must fill it exactly. Pages are
+   absolutely positioned and toggled by .is-visible, which lets a spread show
+   two adjacent pages while every other page stays in place for the next turn.
+
+   NOTE: .orp-content (chapter typography) is shared with the public free
+   preview and the admin chapter preview. Do not scope it under .orp-*.
+   ========================================================================== */
+
+/* ---- Reading environment ------------------------------------------------ */
+body.page-online-reader {
+    overflow: hidden;
+    background: #0a101a;
+}
+
+.page-online-reader .ebs-header,
+.page-online-reader .site-footer { display: none; }
+.page-online-reader .site-main { padding: 0; }
+.page-online-reader .site-main > .container { max-width: none; padding: 0; }
+
+.orp {
+    --orp-page-max: 32rem;      /* width of the closed book, single page    */
+    --orp-spread-max: 66rem;    /* width of the open book, two pages        */
+    --orp-page-pad: 3rem 2.6rem;
+    --orp-font: 1.0625rem;
+    --orp-line: 1.75;
+    --orp-gold: #c9a24b;
+
+    /* Defaults: the "book" theme — a dark navy room, ivory paper. */
+    --orp-room:
+        radial-gradient(1100px 620px at 50% -6%, rgba(56, 74, 104, .40), transparent 62%),
+        radial-gradient(920px 600px at 50% 107%, rgba(40, 55, 84, .38), transparent 58%),
+        linear-gradient(180deg, #0e1524 0%, #0b111d 55%, #0a101a 100%);
+    --orp-paper: #f6f1e4;
+    --orp-ink: #26211a;
+    --orp-gloss: rgba(255, 255, 255, .28);
+    --orp-ambient: 0 30px 70px rgba(0, 0, 0, .55), 0 4px 14px rgba(0, 0, 0, .45);
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    background: var(--orp-room);
+    padding: 92px 12px 80px;
+    box-sizing: border-box;
+}
+
+/* ---- Floating premium toolbar ------------------------------------------
+   Dark glass pill centered above the book: library / contents / bookmarks,
+   page-turn around the centred title, then tools on the right. */
+.orp-head,
+.orp-foot {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 120;
+    box-sizing: border-box;
+    background: rgba(20, 26, 40, .82);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, .14);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, .48), 0 3px 10px rgba(0, 0, 0, .4);
+    color: #dfe6f2;
+}
+
+.orp-head {
+    top: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: max-content;
+    max-width: calc(100vw - 20px);
+    border-radius: 16px;
+    padding: 8px 12px;
+}
+
+.orp-head__side { display: flex; align-items: center; gap: 6px; min-width: 0; }
+
+.orp-head__mid {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+/* A thin brass rule between the toolbar groups, like the reference reader. */
+.orp-divider {
+    flex: 0 0 auto;
+    width: 1px;
+    height: 26px;
+    background: rgba(255, 255, 255, .15);
+}
+
+.orp-head__titleblock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+    max-width: min(40vw, 24rem);
+    text-align: center;
+}
+
+.orp-head__title {
+    color: #f8fafc;
+    font-family: "Times New Roman", Georgia, serif;
+    font-size: 1.02rem;
+    font-weight: 700;
+    letter-spacing: .01em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+.orp-head__chapter {
+    color: #9aa8c0;
+    font-size: .72rem;
+    font-weight: var(--ebs-fw-secondary, 500);
+    letter-spacing: .03em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+.orp-head__chapter:empty { display: none; }
+
+.orp-group { display: inline-flex; align-items: center; gap: 4px; }
+
+/* ---- Toolbar / bottom-bar controls -------------------------------------- */
+.orp-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 38px;
+    min-width: 38px;
+    padding: 0 10px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 11px;
+    color: #cdd6e6;
+    font-size: .84rem;
+    font-weight: var(--ebs-fw-ui, 600);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background .18s ease, border-color .18s ease, color .18s ease;
+}
+.orp-btn:hover:not(:disabled) { background: rgba(255, 255, 255, .14); color: #fff; }
+.orp-btn:focus-visible { outline: 2px solid var(--ebs-orange, #ff9900); outline-offset: 2px; }
+.orp-btn:disabled { opacity: .35; cursor: not-allowed; }
+.orp-btn[aria-pressed="true"],
+.orp-btn[aria-expanded="true"] { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .26); color: #fff; }
+
+.orp-back { text-decoration: none; color: #cdd6e6; }
+.orp-back:hover { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .12); color: #fff; text-decoration: none; }
+
+.orp-tool-turn { width: 34px; padding: 0; color: #e2e8f0; }
+.orp-tool-turn .orp-ico { font-size: 1.3rem; line-height: 1; }
+.orp-btn--chapter { padding: 0 9px; font-size: .78rem; color: #9aa8c0; }
+
+.orp-ico { display: inline-flex; align-items: center; justify-content: center; font-size: 1.05rem; line-height: 1; }
+.orp-lbl { font-size: .8rem; letter-spacing: .01em; }
+
+.orp-metric {
+    font-variant-numeric: tabular-nums;
+    font-size: .72rem;
+    font-weight: 600;
+    color: #9aa8c0;
+    min-width: 2.4rem;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* ---- Large circular page-turn arrows -------------------------------------
+   Flanking the book, vertically centred on the stage. They drive the same
+   flip engine as the keyboard and toolbar buttons. */
+.orp-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 55;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, .18);
+    background: rgba(255, 255, 255, .07);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    color: #dfe6f2;
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+.orp-arrow:hover:not(:disabled) { background: rgba(201, 162, 75, .85); color: #1c2333; border-color: transparent; }
+.orp-arrow:focus-visible { outline: 2px solid var(--ebs-orange, #ff9900); outline-offset: 2px; }
+.orp-arrow:disabled { opacity: .25; pointer-events: none; }
+.orp-arrow .orp-ico { font-size: 1.6rem; }
+.orp-arrow--prev { left: 18px; }
+.orp-arrow--next { right: 18px; }
+
+/* ---- Stage: the room that owns the book --------------------------------- */
+.orp-body {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+}
+
+.orp-stage {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 6px 76px;   /* a runway each side so the arrows never cover a page */
+    perspective: 2600px;
+}
+
+/* The pages container owns the book's size: JS sets --orp-page-height from
+   the stage's usable height, CSS decides how wide the book may be. It also
+   carries the 3D context down to the cover and the turning sheet, and casts
+   one soft, deep shadow over the whole open book. */
+.orp-pages {
+    position: relative;
+    width: min(100%, var(--orp-page-max));
+    height: var(--orp-page-height, calc(100vh - 10rem));
+    place-self: center;
+    box-shadow: 0 40px 90px rgba(0, 0, 0, .5);
+    border-radius: 10px;
+    transition: none;
+    transform-style: preserve-3d;
+}
+
+/* One paginated slice of the chapter. Absolutely positioned so every page
+   keeps its slot; .is-visible is what the reader is looking at right now.
+   Paper tone comes from the theme; the inset shadows suggest a sheet bent
+   toward the spine and the offset paper tones sketch the book's thickness. */
+.orp-page {
+    position: absolute;
+    top: 0;
+    left: 0;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    visibility: hidden;
+    background: var(--orp-paper);
+    background-image: linear-gradient(180deg, var(--orp-gloss), transparent 34%);
+    color: var(--orp-ink);
+    padding: var(--orp-page-pad);
+    font-family: "Times New Roman", Georgia, serif;
+    font-size: var(--orp-font);
+    line-height: var(--orp-line);
+    overflow: hidden;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.orp-page.is-visible { visibility: visible; }
+
+/* Layered page edges + a curved inner lip, per side of the spread. */
+.orp-page--left {
+    left: 0;
+    border-radius: 4px 0 0 4px;
+    box-shadow:
+        -3px 1px 0 -2px var(--orp-paper),
+        -6px 2px 0 -4px var(--orp-paper),
+        var(--orp-ambient),
+        inset -16px 0 26px -16px rgba(0, 0, 0, .24);
+}
+.orp-page--right {
+    left: 50%;
+    border-radius: 0 4px 4px 0;
+    box-shadow:
+        3px 1px 0 -2px var(--orp-paper),
+        6px 2px 0 -4px var(--orp-paper),
+        var(--orp-ambient),
+        inset 16px 0 26px -16px rgba(0, 0, 0, .20);
+}
+
+.orp-page__num {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 1.05rem;
+    text-align: center;
+    font-size: .74rem;
+    font-weight: var(--ebs-fw-secondary, 500);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .03em;
+    color: var(--orp-ink);
+    opacity: .55;
+    pointer-events: none;
+}
+
+/* The pagination engine measures this element's scrollHeight against its
+   clientHeight, so it must fill the page's content box exactly. */
+.orp-page__inner {
+    box-sizing: border-box;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* ---- The spread --------------------------------------------------------- */
+@media (min-width: 901px) {
+    .orp-pages {
+        width: min(100%, var(--orp-spread-max));
+    }
+
+    .orp-page { width: 50%; }
+
+    /* The spine: a physical binding crease between the two leaves — a soft
+       gradient trough, a hairline of shadow at its heart, and page shadows
+       melting into the fulcrum. Not a simple border. */
+    .orp-pages::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        width: 40px;
+        transform: translateX(-50%);
+        pointer-events: none;
+        z-index: 3;
+        background: linear-gradient(90deg,
+            rgba(0, 0, 0, 0) 0%,
+            rgba(0, 0, 0, .10) 16%,
+            rgba(0, 0, 0, .26) 46%,
+            rgba(0, 0, 0, .34) 50%,
+            rgba(0, 0, 0, .26) 54%,
+            rgba(0, 0, 0, .10) 84%,
+            rgba(0, 0, 0, 0) 100%);
+        box-shadow: inset 0 0 22px rgba(0, 0, 0, .14);
+    }
+}
+
+/* ---- The turn ------------------------------------------------------------ *
+ * One sheet of paper caught mid-flight: an opaque front face (the page
+ * leaving the spread) hinged at the spine onto an opaque back face (the page
+ * arriving). The base pages underneath are already the incoming spread, so
+ * when the sheet lands and JS removes it the eye sees no swap at all.
+ * JS always ends the turn on a timer, so the flow also works where CSS
+ * animations never run (jsdom, print snapshots).
+ * ------------------------------------------------------------------------- */
+@keyframes orp-flip-next {
+    from { transform: rotateY(0); }
+    to   { transform: rotateY(-180deg); }
+}
+
+@keyframes orp-flip-prev {
+    from { transform: rotateY(-180deg); }
+    to   { transform: rotateY(0); }
+}
+
+@keyframes orp-turn-shade {
+    0%, 100% { opacity: 0; }
+    45%, 55% { opacity: .9; }
+}
+
+.orp-turn {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 50%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transform-origin: left center;
+    z-index: 40;
+    pointer-events: none;
+    animation-duration: 640ms;
+    animation-timing-function: cubic-bezier(.23, .72, .28, 1);
+    animation-fill-mode: both;
+    backface-visibility: visible;
+}
+
+/* Single-page mode flips the whole stage instead of one half. */
+.orp-turn--single {
+    left: 0;
+    width: 100%;
+}
+
+.orp-turn--next { animation-name: orp-flip-next; }
+
+/* A previous turn parks the sheet over the left half until it swings back. */
+.orp-turn--prev {
+    animation-name: orp-flip-prev;
+    transform: rotateY(-180deg);
+}
+
+.orp-turn__face {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background: var(--orp-paper);
+    border-radius: 4px;
+    box-shadow: 0 0 26px rgba(0, 0, 0, .28);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.orp-turn__face--back { transform: rotateY(180deg); }
+
+/* The cloned page always fills its face, whatever side class it carried. */
+.orp-turn__face > .orp-page {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    visibility: visible;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+/* A dynamic shadow bends across the sheet while it travels: strongest mid-
+   rotation (when the leaf is edge-on), gone when it lands. */
+.orp-turn__face::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(90deg, rgba(0, 0, 0, .30), transparent 45%, rgba(0, 0, 0, .24));
+    opacity: 0;
+    animation: orp-turn-shade 640ms ease;
+}
+
+/* ---- The front cover ---------------------------------------------------- *
+ * A fresh book opens closed. The cover sits over the right half of the stage
+ * (the full stage on narrow screens) until the reader turns it; its art is
+ * rebuilt from the book's metadata by JS. Board thickness comes from the
+ * stacked edge shadows, like a hardcover sitting on the stack.
+ * ------------------------------------------------------------------------- */
+.orp-cover {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 50%;
+    height: 100%;
+    z-index: 35;
+    box-shadow:
+        6px 1px 0 -2px rgba(0, 0, 0, .30),
+        12px 3px 0 -5px rgba(0, 0, 0, .22),
+        var(--orp-ambient);
+    border-radius: 0 6px 6px 0;
+    background: linear-gradient(160deg, #223a5c 0%, #10192b 100%);
+    overflow: hidden;
+    transform-style: preserve-3d;
+}
+
+.orp-cover::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 5px;
+    bottom: 5px;
+    width: 5px;
+    border-radius: 3px 6px 6px 3px;
+    background: rgba(0, 0, 0, .32);
+    pointer-events: none;
+}
+
+.orp-cover[hidden] { display: none; }
+
+.orp-cover__art {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2.4rem 2rem;
+    color: #f4ead2;
+    background:
+        radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, .10), transparent 55%),
+        linear-gradient(160deg, #27416b 0%, #16233c 55%, #0e1728 100%);
+}
+
+.orp-cover__art img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.orp-cover__scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(10, 14, 24, .32), rgba(10, 14, 24, .80));
+}
+
+.orp-cover__brand {
+    position: absolute;
+    top: 2rem;
+    left: 0;
+    right: 0;
+    font-size: .66rem;
+    letter-spacing: .34em;
+    text-transform: uppercase;
+    opacity: .78;
+    z-index: 2;
+}
+
+.orp-cover__title {
+    font-family: "Times New Roman", Georgia, serif;
+    font-size: clamp(1.3rem, 2.4vw, 2rem);
+    font-weight: 700;
+    line-height: 1.25;
+    max-width: 18ch;
+    z-index: 2;
+}
+
+.orp-cover__author {
+    position: absolute;
+    bottom: 2.2rem;
+    left: 0;
+    right: 0;
+    font-size: .84rem;
+    opacity: .82;
+    z-index: 2;
+}
+
+.orp-cover__frame {
+    position: absolute;
+    inset: 14px;
+    border: 1.5px solid rgba(244, 234, 210, .5);
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: 3;
+}
+
+/* ---- Themes ------------------------------------------------------------- */
+.orp[data-theme="book"] {
+    --orp-room:
+        radial-gradient(1100px 620px at 50% -6%, rgba(56, 74, 104, .40), transparent 62%),
+        radial-gradient(920px 600px at 50% 107%, rgba(40, 55, 84, .38), transparent 58%),
+        linear-gradient(180deg, #0e1524 0%, #0b111d 55%, #0a101a 100%);
+    --orp-paper: #f6f1e4;
+    --orp-ink: #26211a;
+    --orp-gloss: rgba(255, 255, 255, .28);
+    --orp-ambient: 0 30px 70px rgba(0, 0, 0, .55), 0 4px 14px rgba(0, 0, 0, .45);
+}
+
+.orp[data-theme="light"] {
+    --orp-room: linear-gradient(180deg, #eef1f4 0%, #e4e8ec 100%);
+    --orp-paper: #ffffff;
+    --orp-ink: #14181c;
+    --orp-gloss: rgba(255, 255, 255, .6);
+    --orp-ambient: 0 18px 44px rgba(15, 23, 42, .28), 0 2px 8px rgba(15, 23, 42, .18);
+}
+
+.orp[data-theme="sepia"] {
+    --orp-room: linear-gradient(180deg, #e8dec6 0%, #ddd2b6 100%);
+    --orp-paper: #f4ecd8;
+    --orp-ink: #4a3f35;
+    --orp-gloss: rgba(255, 255, 255, .45);
+    --orp-ambient: 0 18px 44px rgba(74, 63, 53, .35), 0 2px 8px rgba(74, 63, 53, .22);
+}
+
+.orp[data-theme="dark"] {
+    --orp-room: linear-gradient(180deg, #0d1116 0%, #0a0d12 100%);
+    --orp-paper: #171c23;
+    --orp-ink: #d6dbe1;
+    --orp-gloss: rgba(255, 255, 255, .05);
+    --orp-ambient: 0 30px 70px rgba(0, 0, 0, .7), 0 0 0 1px rgba(255, 255, 255, .06);
+}
+
+/* ---- Side panels: overlays above the stage ------------------------------ */
+.orp-panel {
+    position: absolute;
+    top: .5rem;
+    z-index: 60;
+    width: min(21rem, calc(100% - 1rem));
+    max-height: calc(100% - 1rem);
+    overflow-y: auto;
+    background: rgba(15, 23, 42, .97);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, .12);
+    border-radius: 14px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, .5);
+    padding: .9rem 1rem 1rem;
+    color: #e2e8f0;
+    font-size: .86rem;
+}
+
+.orp-panel[hidden] { display: none; }
+#orp-toc { left: .5rem; }
+#orp-marks { right: .5rem; }
+
+.orp-panel h2 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: .72rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #9aa8c0;
+    margin: 0 0 .6rem;
+    font-weight: var(--ebs-fw-ui, 600);
+}
+
+.orp-panel .orp-btn { width: 100%; justify-content: center; margin-bottom: .7rem; background: rgba(255, 255, 255, .08); border-color: rgba(255, 255, 255, .14); color: #f1f5f9; }
+.orp-panel .orp-btn:hover:not(:disabled) { background: rgba(255, 255, 255, .16); color: #fff; }
+
+.orp-list { list-style: none; margin: 0 0 1rem; padding: 0; }
+
+.orp-list li { display: flex; align-items: center; gap: 4px; }
+
+.orp-list button {
+    display: block;
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: left;
+    border: 0;
+    background: none;
+    padding: .5rem .6rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: .85rem;
+    color: #e2e8f0;
+    line-height: 1.35;
+    transition: background .15s ease;
+}
+
+.orp-list button:hover { background: rgba(255, 255, 255, .08); }
+.orp-list button:focus-visible { outline: 2px solid var(--ebs-orange, #ff9900); outline-offset: -2px; }
+
+.orp-list button[aria-current="true"] {
+    background: var(--ebs-orange, #ff9900);
+    color: #131921;
+    font-weight: var(--ebs-fw-ui, 600);
+}
+
+.orp-list__meta {
+    display: block;
+    font-size: .72rem;
+    opacity: .65;
+    font-weight: var(--ebs-fw-secondary, 500);
+}
+
+.orp-list__del {
+    flex: 0 0 auto;
+    background: none;
+    border: 0;
+    color: #fca5a5;
+    cursor: pointer;
+    padding: .3rem .5rem;
+    border-radius: 6px;
+    font-size: .95rem;
+    line-height: 1;
+}
+.orp-list__del:hover { background: rgba(239, 68, 68, .18); color: #fff; }
+
+.orp-empty { opacity: .6; font-size: .8rem; padding: .35rem .55rem; }
+
+.orp-hint {
+    font-size: .76rem;
+    color: #9aa8c0;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ---- Floating bottom bar: the reading-progress track -------------------- */
+.orp-foot {
+    bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    width: max-content;
+    max-width: calc(100vw - 20px);
+    border-radius: 50px;
+    padding: 8px 14px;
+}
+
+.orp-foot__track {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.orp-foot__icon {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    color: #e6c67e;
+}
+
+.orp-pageinfo {
+    font-variant-numeric: tabular-nums;
+    font-size: .8rem;
+    font-weight: var(--ebs-fw-ui, 600);
+    color: #e8edf5;
+    white-space: nowrap;
+}
+
+.orp-progress {
+    position: relative;
+    flex: 1 1 auto;
+    height: 6px;
+    min-width: 4rem;
+    background: rgba(255, 255, 255, .16);
+    border-radius: 10px;
+}
+
+.orp-progress__bar {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, #e6c67e, #c9a24b);
+    border-radius: 10px;
+    transition: width .25s ease;
+}
+
+.orp-progress__pin {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: #fff;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 0 3px rgba(201, 162, 75, .45);
+    pointer-events: none;
+}
+
+.orp-percent {
+    font-variant-numeric: tabular-nums;
+    font-size: .78rem;
+    font-weight: 700;
+    color: #e8edf5;
+    min-width: 2.6rem;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.orp-save {
+    font-size: .74rem;
+    color: #9aa8c0;
+    white-space: nowrap;
+    min-width: 3.5rem;
+    text-align: center;
+}
+
+.orp-status {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 1.5rem;
+    text-align: center;
+    color: #e2e8f0;
+    font-size: .95rem;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.orp-status[hidden] { display: none; }
+.orp-status--error { color: #fca5a5; }
+
+/* A gentle settle when a chapter lands: the book fades up onto the stage.
+   Deliberately not a page transition — the reader turn is the 3D flip. */
+@keyframes orp-landing {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+.orp-stage--landing .orp-pages {
+    animation: orp-landing .45s ease;
+}
+
+/* Chapter content.
+   Shared by the paginated pages (.orp-page__inner), the public free preview
+   and the admin preview, so a preview really does look like the reader. */
+.orp-content > *:first-child { margin-top: 0; }
+.orp-content > *:last-child { margin-bottom: 0; }
+
+.orp-content p { margin: 0 0 1.05em; }
+.orp-content h1, .orp-content h2, .orp-content h3,
+.orp-content h4, .orp-content h5, .orp-content h6 {
+        margin: 1.6em 0 0.6em;
+        line-height: 1.3;
+        font-weight: var(--ebs-fw-heading, 700);
+}
+
+/* The chapter's own top-level heading is its major heading. */
+.orp-content h1 { font-weight: var(--ebs-fw-display, 800); }
+
+.orp-content h1 { font-size: 1.6em; }
+.orp-content h2 { font-size: 1.35em; }
+.orp-content h3 { font-size: 1.18em; }
+.orp-content h4, .orp-content h5, .orp-content h6 { font-size: 1.05em; }
+.orp-content ul, .orp-content ol { margin: 0 0 1.05em; padding-left: 1.5em; }
+.orp-content li { margin-bottom: 0.4em; }
+.orp-content blockquote {
+    margin: 1.2em 0;
+    padding-left: 1rem;
+    border-left: 3px solid currentColor;
+    opacity: 0.9;
+    font-style: italic;
+}
+.orp-content pre {
+    background: rgba(127, 127, 127, 0.14);
+    padding: 0.85rem 1rem;
+    border-radius: 6px;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    font-size: 0.88em;
+}
+.orp-content code { font-size: 0.92em; }
+.orp-content img {
+    max-width: 100%;
+    /* Never let artwork taller than the page force a bad break. */
+    max-height: 100%;
+    height: auto;
+    display: block;
+    margin: 1.2em auto;
+}
+.orp-content figure { margin: 1.2em 0; }
+.orp-content figcaption {
+    font-size: 0.86em;
+    opacity: 0.75;
+    text-align: center;
+    margin-top: 0.5em;
+}
+.orp-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.2em 0;
+    font-size: 0.92em;
+}
+.orp-content th, .orp-content td {
+    border: 1px solid currentColor;
+    padding: 0.45em 0.6em;
+    text-align: left;
+}
+.orp-content hr {
+    border: 0;
+    border-top: 1px solid currentColor;
+    opacity: 0.3;
+    margin: 2em 0;
+}
+.orp-content a { color: var(--ebs-link, #007185); }
+
+/* Fullscreen -------------------------------------------------------------- */
+.orp:fullscreen,
+.orp:-webkit-full-screen {
+    height: 100vh;
+    padding: 92px 12px 80px;
+}
+
+/* Responsive -------------------------------------------------------------- */
+@media (max-width: 900px) {
+    .orp {
+        padding: 68px 8px 74px;
+        --orp-page-pad: 2.1rem 1.5rem;
+    }
+
+    .orp-stage { padding: 6px 8px; }
+
+    .orp-pages { width: min(100%, var(--orp-page-max)); }
+    .orp-page { border-radius: 4px; }
+
+    /* One page at a time: the cover fills the stage like a real closed book. */
+    .orp-cover { left: 0; width: 100%; border-radius: 5px; box-shadow: var(--orp-ambient); }
+
+    .orp-pages::after { display: none; }
+
+    .orp-arrow { width: 46px; height: 46px; }
+    .orp-arrow .orp-ico { font-size: 1.4rem; }
+    .orp-arrow--prev { left: 10px; }
+    .orp-arrow--next { right: 10px; }
+
+    .orp-foot { gap: 10px; padding: 7px 12px; }
+    .orp-foot .orp-save { display: none; }
+}
+
+@media (max-width: 768px) {
+    /* On narrow screens the toolbar may wrap to two rows; let it take real
+       space so the book always sits clear underneath instead of floating
+       over it. It still reads as a floating glass pill. */
+    .orp { padding: 0 8px 74px; }
+    .orp-head {
+        position: relative;
+        top: auto;
+        left: auto;
+        transform: none;
+        margin: 8px auto 0;
+        width: max-content;
+        max-width: calc(100vw - 8px);
+        border-radius: 14px;
+        padding: 6px 9px;
+        gap: 8px;
+    }
+    .orp-foot { bottom: 10px; border-radius: 40px; }
+
+    /* Labels give way to icons; every control keeps its aria-label. */
+    .orp-lbl { display: none; }
+    .orp-head__chapter { display: none; }
+    .orp-head__title { font-size: .88rem; }
+
+    .orp-btn { height: 32px; min-width: 32px; padding: 0 8px; font-size: .82rem; border-radius: 9px; }
+    .orp-tool-turn { width: 30px; padding: 0; }
+    .orp-btn--chapter { padding: 0 6px; }
+
+    #orp-font-label { display: none; }
+    #orp-theme { max-width: 4.6rem; overflow: hidden; text-overflow: ellipsis; }
+
+    .orp-divider { height: 22px; }
+    .orp-pageinfo { font-size: .74rem; }
+    .orp-metric { min-width: 2rem; }
+}
+
+@media (max-width: 420px) {
+    .orp-head__titleblock { max-width: 30vw; }
+    .orp-arrow { width: 42px; height: 42px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    /* JS never creates a sheet without motion; if one ever appears the base
+       pages already carry the incoming spread, so it must not be seen. */
+    .orp-turn { display: none; }
+    .orp-stage--landing .orp-pages { animation: none; }
+    .orp-progress__bar, .orp-progress__pin { transition: none; }
+    .orp-btn, .orp-arrow { transition: none; }
+}
+
+/* Print ------------------------------------------------------------------- */
+@media print {
+    body.page-online-reader { overflow: visible; background: #fff; }
+    .orp-head, .orp-foot, .orp-panel, .orp-hint, .orp-progress, .orp-status,
+    .orp-cover, .orp-turn, .orp-arrow { display: none !important; }
+    .orp, .orp-body, .orp-stage { height: auto; overflow: visible; display: block; background: #fff; padding: 0; }
+    .orp-pages { width: auto; height: auto; box-shadow: none; border-radius: 0; }
+    .orp-page {
+        position: static;
+        visibility: visible;
+        box-shadow: none;
+        border: 0;
+        border-bottom: 1px solid #ccc;
+        page-break-after: always;
+        min-height: 0;
+        height: auto;
+        width: auto;
+        border-radius: 0;
+    }
+}
+
+.visually-hidden {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}

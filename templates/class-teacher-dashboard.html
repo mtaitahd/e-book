@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supervisor Dashboard</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/css/ruang-admin.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    .sidebar-brand { background-color: rgb(114, 87, 139) !important; }
+    .bg-navbar { background-color: rgb(105, 105, 141) !important; }
+    .student-card { border-left: 4px solid rgb(105, 105, 141); }
+  </style>
+</head>
+<body id="page-top">
+  <div id="wrapper">
+    <!-- Sidebar -->
+    <ul class="navbar-nav sidebar sidebar-light accordion" id="accordionSidebar">
+      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="#" style="background-color: rgb(114, 87, 139);">
+        <div class="sidebar-brand-icon">
+          <i class="fas fa-school fa-2x text-white"></i>
+        </div>
+        <div class="sidebar-brand-text mx-3 text-white" style="font-size: 12px;">SUPERVISOR</div>
+      </a>
+      <hr class="sidebar-divider my-0">
+      <li class="nav-item active">
+        <a class="nav-link" href="class-teacher-dashboard.html">
+          <i class="fas fa-fw fa-tachometer-alt"></i>
+          <span>Dashboard</span>
+        </a>
+      </li>
+      <hr class="sidebar-divider">
+      <div class="sidebar-heading">Features</div>
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseBootstrap" aria-expanded="true" aria-controls="collapseBootstrap">
+          <i class="far fa-fw fa-window-maximize"></i>
+          <span>Team Management</span>
+        </a>
+        <div id="collapseBootstrap" class="collapse" aria-labelledby="headingBootstrap" data-parent="#accordionSidebar">
+          <div class="bg-white py-2 collapse-inner rounded">
+            <h6 class="collapse-header">Team</h6>
+            <a class="collapse-item" href="#">Assign Subjects</a>
+            <a class="collapse-item" href="#">Manage Team</a>
+          </div>
+        </div>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseForm" aria-expanded="true" aria-controls="collapseForm">
+          <i class="fab fa-fw fa-wpforms"></i>
+          <span>Student Management</span>
+        </a>
+        <div id="collapseForm" class="collapse" aria-labelledby="headingForm" data-parent="#accordionSidebar">
+          <div class="bg-white py-2 collapse-inner rounded">
+            <h6 class="collapse-header">Students</h6>
+            <a class="collapse-item" href="#">Add Student</a>
+            <a class="collapse-item" href="#">Manage Students</a>
+          </div>
+        </div>
+      </li>
+      <hr class="sidebar-divider">
+      <div class="sidebar-heading">School</div>
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePage" aria-expanded="true" aria-controls="collapsePage">
+          <i class="fas fa-fw fa-columns"></i>
+          <span>My Student Results</span>
+        </a>
+        <div id="collapsePage" class="collapse" aria-labelledby="headingPage" data-parent="#accordionSidebar">
+          <div class="bg-white py-2 collapse-inner rounded">
+            <h6 class="collapse-header">Result Category</h6>
+            <a class="collapse-item" href="#">Student Grade</a>
+            <a class="collapse-item" href="#">Midterm</a>
+            <a class="collapse-item" href="#">Terminal 1</a>
+            <a class="collapse-item" href="#">Terminal 2</a>
+          </div>
+        </div>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">
+          <i class="fas fa-fw fa-chart-area"></i>
+          <span>Subjects</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">
+          <i class="fas fa-fw fa-envelope"></i>
+          <span>SMS</span>
+        </a>
+      </li>
+      <hr class="sidebar-divider">
+      <div class="version" id="version-ruangadmin">Version 1.1</div>
+    </ul>
+    <!-- End Sidebar -->
+    <div id="content-wrapper" class="d-flex flex-column">
+      <div id="content">
+        <!-- TopBar -->
+        <nav class="navbar navbar-expand navbar-light bg-navbar topbar mb-4 static-top" style="background-color: rgb(105, 105, 141);">
+          <button id="sidebarToggleTop" class="btn btn-link rounded-circle mr-3">
+            <i class="fa fa-bars text-white"></i>
+          </button>
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item dropdown no-arrow mx-1">
+              <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-bell fa-fw text-white"></i>
+                <span class="badge badge-danger badge-counter">5</span>
+              </a>
+              <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="alertsDropdown">
+                <h6 class="dropdown-header">Alerts Center</h6>
+                <a class="dropdown-item d-flex align-items-center" href="#"><div class="mr-3"><div class="icon-circle bg-warning"><i class="fas fa-exclamation-triangle text-white"></i></div></div><div><div class="small text-gray-500">Today</div><span class="font-weight-bold">3 students missing marks</span></div></a>
+                <a class="dropdown-item text-center small text-gray-500" href="#">Show All Alerts</a>
+              </div>
+            </li>
+            <div class="topbar-divider d-none d-sm-block"></div>
+            <li class="nav-item dropdown no-arrow">
+              <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <div class="img-profile rounded-circle bg-secondary" style="width: 32px; height: 32px; display: inline-block;"></div>
+                <span class="ml-2 d-none d-lg-inline text-white small">SUPERVISOR</span>
+              </a>
+              <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                <a class="dropdown-item" href="#"><i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i> Profile</a>
+                <a class="dropdown-item" href="#"><i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i> Settings</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i> Logout</a>
+              </div>
+            </li>
+          </ul>
+        </nav>
+        <!-- End TopBar -->
+
+        <!-- Main Content -->
+        <div class="container-fluid" id="container-wrapper">
+          <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <h6 class="h3 mb-0 text-gray-800">Logged in as Supervisor</h6>
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item"><a href="#" class="text-primary">Home</a></li>
+              <li class="breadcrumb-item active">Dashboard</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="container-fluid" id="container-wrapper">
+          <div class="row mb-3">
+            <div class="col-xl-3 col-md-6 mb-4">
+              <div class="card h-100">
+                <div class="card-body">
+                  <div class="row align-items-center">
+                    <div class="col mr-2">
+                      <div class="text-xs font-weight-bold text-uppercase mb-1">My Class</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800">Class 5</div>
+                      <div class="mt-2 mb-0 text-muted text-xs">
+                        <span class="text-success mr-2"><i class="fa fa-arrow-up"></i> 2025</span>
+                      </div>
+                    </div>
+                    <div class="col-auto">
+                      <i class="fas fa-chalkboard fa-2x text-info"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+              <div class="card h-100">
+                <div class="card-body">
+                  <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                      <div class="text-xs font-weight-bold text-uppercase mb-1">Total Students</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800">42</div>
+                      <div class="mt-2 mb-0 text-muted text-xs">
+                        <span class="text-success mr-2"><i class="fas fa-arrow-up"></i> enrolled</span>
+                      </div>
+                    </div>
+                    <div class="col-auto">
+                      <i class="fa-sharp fa-solid fa-graduation-cap fa-2x text-success"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+              <div class="card h-100">
+                <div class="card-body">
+                  <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                      <div class="text-xs font-weight-bold text-uppercase mb-1">Subjects</div>
+                      <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">8</div>
+                      <div class="mt-2 mb-0 text-muted text-xs">
+                        <span class="text-success mr-2"><i class="fas fa-arrow-up"></i> active</span>
+                      </div>
+                    </div>
+                    <div class="col-auto">
+                      <i class="fas fa-book fa-2x text-primary"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+              <div class="card h-100">
+                <div class="card-body">
+                  <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                      <div class="text-xs font-weight-bold text-uppercase mb-1">Team Members</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800">7</div>
+                      <div class="mt-2 mb-0 text-muted text-xs">
+                        <span class="text-success mr-2"><i class="fas fa-arrow-up"></i> assigned</span>
+                      </div>
+                    </div>
+                    <div class="col-auto">
+                      <i class="fas fa-users fa-2x text-warning"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Student List -->
+        <div class="container-fluid">
+          <div class="card mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+              <h6 class="m-0 font-weight-bold text-primary">My Students</h6>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-bordered" width="100%" cellspacing="0">
+                  <thead>
+                    <tr>
+                      <th>Roll No</th>
+                      <th>Name</th>
+                      <th>Class</th>
+                      <th>Parent Phone</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>S1001/2025</td>
+                      <td>John Doe</td>
+                      <td>Class 5</td>
+                      <td>+255 712 345 678</td>
+                      <td><span class="badge badge-success">Active</span></td>
+                    </tr>
+                    <tr>
+                      <td>S1002/2025</td>
+                      <td>Jane Smith</td>
+                      <td>Class 5</td>
+                      <td>+255 713 456 789</td>
+                      <td><span class="badge badge-success">Active</span></td>
+                    </tr>
+                    <tr>
+                      <td>S1003/2025</td>
+                      <td>Ali Hassan</td>
+                      <td>Class 5</td>
+                      <td>+255 714 567 890</td>
+                      <td><span class="badge badge-warning">Incomplete</span></td>
+                    </tr>
+                    <tr>
+                      <td>S1004/2025</td>
+                      <td>Asha Mwinyi</td>
+                      <td>Class 5</td>
+                      <td>+255 715 678 901</td>
+                      <td><span class="badge badge-success">Active</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Result Overview -->
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-xl-6">
+              <div class="card mb-4">
+                <div class="card-header py-3">
+                  <h6 class="m-0 font-weight-bold text-primary">Recent Results</h6>
+                </div>
+                <div class="card-body">
+                  <canvas id="myBarChart" height="200"></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-6">
+              <div class="card mb-4">
+                <div class="card-header py-3">
+                  <h6 class="m-0 font-weight-bold text-primary">Attendance Overview</h6>
+                </div>
+                <div class="card-body">
+                  <canvas id="myDoughnutChart" height="200"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="sticky-footer bg-white">
+        <div class="container my-auto">
+          <div class="copyright text-center my-auto">
+            <span>copyright &copy; <script>document.write(new Date().getFullYear());</script> - developed by <b><a href="#">MTAITA TECH</a></b></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <script src="assets/vendor/jquery/jquery.min.js"></script>
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/jquery-easing/jquery.easing.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+  <script src="assets/js/ruang-admin.min.js"></script>
+  <script>
+    !function($){"use strict";$("#sidebarToggle, #sidebarToggleTop").on("click",(function(e){$("body").toggleClass("sidebar-toggled"),$(".sidebar").toggleClass("toggled"),$(".sidebar").hasClass("toggled")&&$(".sidebar .collapse").collapse("hide")})),$(window).resize((function(){$(window).width()<768&&$(".sidebar .collapse").collapse("hide")}))}(jQuery);
+    Chart.defaults.global.defaultFontFamily = 'Nunito, -apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+    Chart.defaults.global.defaultFontColor = '#858796';
+    new Chart(document.getElementById("myBarChart"), {
+      type: 'bar',
+      data: {
+        labels: ["Math", "English", "Science", "History", "Geography"],
+        datasets: [{
+          label: "Average Score", backgroundColor: ["#4e73df", "#1cc88a", "#36b9cc", "#f6c23e", "#e74a3b"],
+          hoverBackgroundColor: ["#2e59d9", "#17a673", "#2c9faf", "#f4b619", "#e02d1b"],
+          borderColor: "rgba(234, 236, 244, 1)", data: [78, 82, 75, 69, 71]
+        }]
+      },
+      options: { maintainAspectRatio: false, layout: { padding: { left: 10, right: 25, top: 25, bottom: 0 } }, scales: { xAxes: [{ gridLines: { display: false, drawBorder: false } }], yAxes: [{ ticks: { maxTicksLimit: 6, padding: 10 }, gridLines: { color: "rgb(234, 236, 244)", zeroLineColor: "rgb(234, 236, 244)", drawBorder: false, borderDash: [2], zeroLineBorderDash: [2] } }] }, legend: { display: false }, tooltips: { backgroundColor: "rgb(255,255,255)", bodyFontColor: "#858796", borderColor: '#dddfeb', borderWidth: 1, xPadding: 15, yPadding: 15, displayColors: false, caretPadding: 10 } }
+    });
+    new Chart(document.getElementById("myDoughnutChart"), {
+      type: 'doughnut',
+      data: { labels: ["Present", "Absent", "Late"], datasets: [{ data: [85, 10, 5], backgroundColor: ["#1cc88a", "#e74a3b", "#f6c23e"], hoverBackgroundColor: ["#17a673", "#e02d1b", "#f4b619"], hoverBorderColor: "rgba(234, 236, 244, 1)" }] },
+      options: { maintainAspectRatio: false, tooltips: { backgroundColor: "rgb(255,255,255)", bodyFontColor: "#858796", borderColor: '#dddfeb', borderWidth: 1, xPadding: 15, yPadding: 15, displayColors: false, caretPadding: 10 }, legend: { display: false }, cutoutPercentage: 70 }
+    });
+  </script>
+</body>
+</html>

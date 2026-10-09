@@ -1,0 +1,669 @@
+/* Main CSS Here */
+
+/* ============================================================
+   Admin shell: the sidebar and the topbar never move
+   ------------------------------------------------------------
+   The stock template lets the whole page scroll, so the sidebar
+   scrolled off the top and the topbar had to be pinned with
+   position:sticky -- which does not actually work here. The
+   template sets `overflow-x: hidden` on #content-wrapper, and
+   that forces the other axis to compute to `auto`, turning it
+   into a scroll container. A sticky element only moves relative
+   to its nearest *scrolling* ancestor, and #content-wrapper
+   never scrolls itself, so the topbar just scrolled away anyway.
+
+   Rather than fight that with `overflow: clip` (which silently
+   falls back to the broken behaviour on browsers that lack it),
+   the admin is a fixed-height app shell: the page itself does
+   not scroll at all, #adminScroll is the one scroll container,
+   and the sidebar and topbar sit outside it entirely. Nothing
+   depends on sticky positioning, so it works the same everywhere.
+   ============================================================ */
+
+html, body { height: 100%; }
+
+/* Clip the shell rather than letting it grow past the viewport. */
+#wrapper { height: 100vh; overflow: hidden; }
+
+/* The sidebar scrolls its own menu if the entries ever outgrow
+   the window, and stays out of the way of the content column. */
+.sidebar {
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#content-wrapper { height: 100vh; overflow: hidden; }
+
+/* Column layout so #adminScroll can take the leftover height. */
+#content {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+}
+
+/* The single scroll container: the topbar sits above it, so the
+   header never moves. min-height:0 is what lets this shrink
+   instead of being stretched by its content. */
+#adminScroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Printing cannot use a clipped, scrolling shell, so flatten it
+   back to normal document flow. */
+@media print {
+    html, body, #wrapper, #content-wrapper, #content, #adminScroll, .sidebar {
+        height: auto !important;
+        overflow: visible !important;
+    }
+}
+
+#link{
+    color:blueviolet;
+    margin:20px;
+    font-weight: bold;
+}
+#button{
+    width:10%;
+    height:40px;
+    border-radius: 15px;
+    background-color: blueviolet;
+    border: 2px solid blueviolet;
+}
+a{
+    text-decoration: none;
+    color: white;
+}
+#brands{
+    margin:10px;
+}
+
+header {
+  height: 70px;
+  width: 100vw;
+  padding: 0 30px;
+  background-color:rgb(105, 105, 141);
+  z-index: 100;
+  box-shadow: 1px 1px 15px rgba(161, 182, 253, 0.825);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+#top{
+    height: 70px;
+    width: 100vw;
+    padding: 0 30px;
+    z-index: 100;
+    box-shadow: 1px 1px 15px rgba(161, 182, 253, 0.825);
+    display: flex;
+    justify-content: space-between;
+   align-items: center;
+  
+}
+
+.logo {
+  font-size: 27px;
+  font-weight: 600;
+  color: white;
+}
+
+.icn {
+  height: 30px;
+}
+.menuicn {
+  cursor: pointer;
+}
+
+
+
+
+.logosec {
+  gap: 60px;
+}
+
+
+  #img002{
+width:100%;
+height:600px;
+opacity: 25%;
+  }
+ #icons{
+  font-size: 65px;
+ }
+.box-container{
+  display: none; /* Hidden by default */
+   /* Stay in place */
+  z-index: 1; /* Sit on top */
+  position: fixed;
+  left: 0;
+  top: 0;
+   /* Full height */
+   overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+ 
+  padding-bottom: 30px;
+ max-height:77490px;
+width: 40%;
+background-color: white;
+ box-shadow: 3px 3px 10px rgba(0, 30, 87, 0.751);
+ 
+ margin-left:32%;
+ padding-bottom:15px;
+}
+#animate,.animate {
+  -webkit-animation: animatezoom 0.6s;
+  animation: animatezoom 0.6s
+}
+
+@-webkit-keyframes animatezoom {
+  from {-webkit-transform: scale(0)} 
+  to {-webkit-transform: scale(1)}
+}
+
+@keyframes animatezoom {
+  from {transform: scale(0)} 
+  to {transform: scale(1)}
+}
+  #hd001{
+margin-top: -30%;
+font-family: Arial Black;
+  }
+  #qn{
+    background-color: blue;
+    border: 2px solid rgb(194, 230, 34);
+    border-radius: 15px;
+    font-size: 14px;
+    font-family: Times New Roman;
+    height:40px;
+
+  }
+  .box{
+    background-color: white;
+    box-shadow: 3px 3px 10px rgba(0, 30, 87, 0.751); 
+    width:21%;
+    height: 160px;
+    float: left;
+    margin: 10px;
+    margin-left:3%;
+    border-radius: 15px;
+    margin-top: 90%;
+    color:rgb(105, 105, 141);
+    font-size: 20px;
+    
+  }
+  .box:hover{
+    background-color: yellow;
+    border: 2px solid blueviolet;
+  }
+  .foot,.box{
+    margin:10px;
+    float: left;
+  }
+  .foot{
+    width: 100%;
+    max-height:16400px;
+    background-color: rgb(61, 46, 46);
+    padding-bottom: 40px;
+  }
+
+.img{
+    width:100%;
+    height:600px;
+    background-image: url(r1.jpg);
+    background-size: cover;
+}
+.ft1{ 
+    width: 30%;
+    height: 460px;
+    float: left;
+    margin: 18px;
+    color:white; 
+    border-radius: 15px;
+  
+      
+}
+
+/* Full-width input fields */
+input[type=text], input[type=password],input[type=imail],select {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+/* Set a style for all buttons */
+button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+/* Extra styles for the cancel button */
+.cancelbtn {
+  width: auto;
+  padding: 10px 18px;
+  background-color: #f44336;
+}
+
+/* Center the image and position the close button */
+.imgcontainer {
+  text-align: center;
+  margin: 24px 0 12px 0;
+  position: relative;
+}
+
+img.avatar {
+  width: 40%;
+  border-radius: 50%;
+}
+
+.container {
+  padding: 16px;
+}
+
+span.psw {
+  float: right;
+  padding-top: 16px;
+}
+
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 90%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  padding-top: 60px;
+}
+.lgn{
+  display: block; /* Hidden by default */
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+ 
+}
+
+/* Modal Content/Box */
+.modal-content {
+  background-color: #fefefe;
+  margin: 5% auto 15% auto; /* 5% from the top, 15% from the bottom and centered */
+  border: 1px solid #888;
+  width: 90%; /* Could be more or less, depending on screen size */
+}
+.lgn-content {
+  background-color: #fefefe;
+  margin: 5% auto 15% auto; /* 5% from the top, 15% from the bottom and centered */
+  border: 1px solid #888;
+  width: 90%; /* Could be more or less, depending on screen size */
+}
+
+/* The Close Button (x) */
+.close {
+  position: absolute;
+  right: 25px;
+  top: 0;
+  color: #000;
+  font-size: 35px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: red;
+  cursor: pointer;
+}
+
+/* Add Zoom Animation */
+.animate {
+  -webkit-animation: animatezoom 0.6s;
+  animation: animatezoom 0.6s
+}
+
+@-webkit-keyframes animatezoom {
+  from {-webkit-transform: scale(0)} 
+  to {-webkit-transform: scale(1)}
+}
+  
+@keyframes animatezoom {
+  from {transform: scale(0)} 
+  to {transform: scale(1)}
+}
+
+/* Change styles for span and cancel button on extra small screens */
+@media screen and (max-width: 300px) {
+  span.psw {
+     display: block;
+     float: none;
+  }
+  .cancelbtn {
+     width: 100%;
+  }
+ 
+
+
+}
+
+.menu{
+  width:7%;
+  height: 2345px;
+  background-color: rgb(114, 87, 139);
+}
+#contact{
+  margin-top: 25%;
+}
+
+.admin-dtails{
+  width: 100%;
+  background-color: white;
+  max-height: 9999px;
+  padding-bottom: 15px;
+  box-shadow: 2px 2px 5px rgba(14, 9, 9, 0.876);
+  margin: 10px;
+  border: 4px solid rgb(105, 105, 141);
+}
+.det-header{
+  width: 100%;
+  height: 40px;
+  background-color:rgb(105, 105, 141);
+  padding: 10px;
+}
+.dets1{
+  background-color: white;
+  
+  background-color: #9DA3A9;
+}
+.dets2{
+
+  background-color: white;
+  background-color: #B9C8CC;
+}
+.dets1,.dets2{
+  margin: 5px;
+  width: 100%;
+  padding: 7px;
+}
+/* ============================================================
+   Typography
+   ------------------------------------------------------------
+   The admin uses the same self-hosted Nunito variable font and
+   the same weight scale as the storefront. Nunito itself is
+   declared in assets/storefront/css/fonts.css, which the admin
+   layout now loads; Bootstrap already puts "Nunito" first in its
+   body font stack, so it only needed the @font-face to exist.
+
+   Roles (identical to the storefront scale):
+     normal    400  body copy
+     secondary 500  supporting text, metadata, muted text
+     ui        600  navigation, labels, buttons, table headers
+     heading   700  section and card headings
+     display   800  the major heading of a page and big numbers
+   ============================================================ */
+
+:root {
+    --ebs-fw-normal: 400;
+    --ebs-fw-secondary: 500;
+    --ebs-fw-ui: 600;
+    --ebs-fw-heading: 700;
+    --ebs-fw-display: 800;
+}
+
+body {
+    font-weight: var(--ebs-fw-normal);
+}
+
+/* Bootstrap resets h5/h6 to 400, which left the stat card captions and
+   most card titles looking flat. */
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+    font-weight: var(--ebs-fw-heading);
+}
+
+h1, .h1 { font-weight: var(--ebs-fw-display); }
+h2, .h2 { font-weight: var(--ebs-fw-display); }
+
+/* Navigation. The active item keeps Ruang Admin's 800 emphasis; only the
+   resting weight is lifted onto the scale. */
+.sidebar .nav-item .nav-link,
+.sidebar .nav-item .collapse .collapse-inner .collapse-item,
+.topbar .nav-item .nav-link,
+.breadcrumb,
+.pagination .page-link {
+    font-weight: var(--ebs-fw-ui);
+}
+
+/* Labels: form labels, table headers, badges, dropdown headers. */
+label,
+.form-control-label,
+th,
+.badge,
+.dropdown .dropdown-header {
+    font-weight: var(--ebs-fw-ui);
+}
+
+/* Buttons. */
+.btn,
+.btn-group .btn,
+.nav-tabs .nav-link {
+    font-weight: var(--ebs-fw-ui);
+}
+
+/* Supporting text. */
+.text-muted,
+.small,
+small,
+.sidebar .version,
+.help-block,
+.form-text {
+    font-weight: var(--ebs-fw-secondary);
+}
+
+/* Bootstrap has no `.font-weight-bold` utility, so this class was a no-op
+   in every admin template. Honour it instead of leaving it dead. */
+.font-weight-bold { font-weight: var(--ebs-fw-heading); }
+
+/* Stat cards on the dashboard: caption is a label, the figure is a number.
+   Both carry .font-weight-bold, so the more specific selectors below win. */
+.text-xs.font-weight-bold.text-uppercase {
+    font-weight: var(--ebs-fw-ui);
+}
+
+.h5.mb-0.font-weight-bold,
+.h4.mb-0.font-weight-bold,
+.h6.mb-0.font-weight-bold {
+    font-weight: var(--ebs-fw-display);
+}
+/* ============================================================
+   Add / edit popups
+   ------------------------------------------------------------
+   One shared modal is injected by assets/admin/js/admin-modal.js.
+
+   Stacking. This file still carries a pre-Bootstrap dialog from
+   the old theme (the W3Schools-style `.modal`/`.modal-content`
+   block further up, kept because the login and drawer markup
+   grew up alongside it). Because style.css is linked *after*
+   Bootstrap, its `.modal { z-index: 1 }` beat Bootstrap's
+   `.modal { z-index: 1050 }` and dropped the whole dialog
+   underneath its own `.modal-backdrop` (z-index 1040).
+
+   That produced a modal that looked perfectly normal - the
+   backdrop dimmed the page, the dialog was visible through it -
+   but was completely dead to the mouse. Every click landed on
+   the full-viewport backdrop, and because the shell sets
+   data-backdrop="static" the backdrop deliberately refuses to
+   dismiss, so the form could not be focused or typed into and
+   looked frozen.
+
+   Lifting the popup back over its backdrop is the whole fix.
+   Bootstrap reserves 1050-1059 for elements that must sit above
+   a modal, so 1055 clears the 1040 backdrop with room to spare.
+
+   Size. The legacy dialog also spends a lot of the screen on
+   padding and margins - `padding-top: 60px` on .modal plus
+   `.modal-content { margin: 5% auto 15% auto }` is roughly 210px
+   before a single field is drawn - and it pins the content box
+   to 90% of an already narrow dialog. The result was a cramped
+   form: on a 746px viewport the scrollable body was only 411px
+   tall, so even the two-field author form had to be scrolled to
+   reach its own submit button.
+
+   The rules below spend that space on the form instead. The
+   dialog is widened, the legacy vertical margins are dropped,
+   and the body is given a generous floor plus room to grow,
+   still scrolling internally on the longest forms. Colours,
+   borders, fonts and button styling are untouched.
+   ============================================================ */
+
+#adminFormModal {
+    z-index: 1055;
+    pointer-events: auto;
+    left: 0;
+    right: 0;
+    width: 100vw !important;
+    max-width: 100vw;
+    margin: 0;
+    transform: none;
+
+    /* The legacy .modal reserves 60px at the top for a heading this dialog
+       does not have. Reclaim it, but keep a small horizontal gutter: the
+       dialog's own margin is pinned to 0 below (see .modal-dialog), so
+       without padding here the popup would touch the screen edges on
+       anything narrower than its max-width. */
+    padding: 0 .5rem;
+}
+
+/* The only rule with real logic is the pair below: the same form
+   partial is reused by the popup and by the standalone page, so
+   exactly one of the two Cancel controls should ever be visible.
+   Bootstrap 4 adds .modal-open to <body> while a modal is open,
+   which is what switches between them. */
+body.modal-open .admin-page-cancel { display: none; }
+body:not(.modal-open) .admin-modal-cancel { display: none; }
+
+/* Keep the shared CRUD forms centered on both popup and standalone pages. */
+.admin-modal-form {
+    width: 100%;
+    max-width: 760px;
+    margin-inline: auto;
+}
+
+/* Width. 1200px turned out to be too wide to read comfortably: at that size a
+   single-line input stretched the better part of a desk, and the eye had to
+   travel too far from the label to the field. 1000px keeps the popup
+   generous while letting the form sit in a readable column. The
+   `min(100%, 1000px)` cap is what makes it responsive - the dialog can
+   never be wider than the space it is given, so there is nothing to
+   hard-code a breakpoint for.
+
+   The height cap is the important half. The legacy .modal is
+   `overflow: auto` and Bootstrap centres the dialog with flexbox, so a
+   dialog that outgrows its container gets pushed off the *top* of the
+   screen - taking the header and the X button with it. Bootstrap's own
+   `.modal-dialog-centered` already reserves calc(100% - 1rem) for the
+   dialog, so the margin must stay 0 or the two together overflow and
+   that cut-off comes back. */
+#adminFormModal .modal-dialog {
+    width: 100%;
+    max-width: min(100%, 1000px);
+    margin: 0 auto;
+    left: auto;
+    max-height: calc(100vh - 2rem);
+}
+
+#adminFormModal .modal-content {
+    width: 100%;
+    margin: 0;
+    max-height: calc(100vh - 2rem);
+}
+
+/* Centre the form inside the dialog.
+
+   The markup is a stack of full-width `.form-group`s, and the book form
+   nests a `.row` of `.col-md-*` for its side-by-side fields. Left alone
+   that row stretches to the full dialog width, which is what made the
+   form read as a full-bleed wall of inputs. Capping the form itself and
+   centring it keeps the fields in a comfortable column with symmetric
+   space down both sides, and the submit row lines up with the fields
+   instead of drifting off to the right. The `auto` margins are what do
+   the centring, so this needs no media query. */
+#adminFormModal .modal-body form.admin-modal-form {
+    max-width: 760px;
+    margin-inline: auto;
+}
+
+/* Taller: a floor so short forms do not look stunted, then let the body take
+   whatever room is left and scroll internally. Capping the dialog rather than
+   the body is what keeps the header and the submit row on screen. */
+#adminFormModal .modal-body {
+    flex: 1 1 auto;
+    min-height: 55vh;
+    overflow-y: auto;
+}
+
+/* Narrow screens.
+
+   55vh is a sensible floor on a desk but is a large slice of a phone, where
+   it would leave the header and the submit row cramped. Below the Bootstrap
+   `sm` breakpoint the body drops the floor and simply takes its natural
+   height, letting the dialog cap do the scrolling; the horizontal padding
+   tightens so the fields get the width back. */
+@media (max-width: 575.98px) {
+    #adminFormModal .modal-body {
+        min-height: 0;
+        padding: .75rem;
+    }
+
+    #adminFormModal .modal-header,
+    #adminFormModal .modal-footer {
+        padding: .75rem;
+    }
+}
+
+/* The legacy .close is `position: absolute; top: 0` with a -16px top margin
+   and 16px of padding, so its box deliberately hangs 16px above whatever
+   contains it. That was harmless when the dialog was short, but on a
+   full-height dialog the top of the button gets clipped off the screen.
+   Anchoring it to the header and offsetting by that same 16px keeps the
+   whole button - padding and all - inside the dialog. */
+#adminFormModal .modal-header {
+    position: relative;
+}
+
+#adminFormModal .modal-header .close {
+    top: 16px;
+}
+
+#adminFormModal .form-group:last-of-type {
+    margin-bottom: 0;
+}
+
+/* Keep the custom-file filename from overflowing narrow screens. */
+#adminFormModal .custom-file-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Disabled while a save is in flight, so a double click cannot post twice. */
+#adminFormModal form[data-submitting="true"] {
+    opacity: .55;
+    pointer-events: none;
+}
