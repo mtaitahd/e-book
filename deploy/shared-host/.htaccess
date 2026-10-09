@@ -1,0 +1,90 @@
+# -----------------------------------------------------------------------------
+# Gajoki Books - root front-controller rules for SHARED HOSTING (Option B)
+#
+# This file is ONLY active when the domain document root is the Laravel
+# project root (e.g. cPanel public_html) instead of public/. The recommended
+# deployment points the document root at public/ (see DEPLOYMENT.md) - then
+# this file and the root index.php sit outside the document root and are
+# never read.
+#
+# If you use this fallback:
+#   * copy this file AND deploy/shared-host/index.php into the document root;
+#   * if the server already has a root .htaccess of its own (for example a
+#     cPanel "Force HTTPS" redirect), MERGE its rules into this file before
+#     uploading - never silently overwrite it;
+#   * keep the deny rules below unchanged; they are the boundary that keeps
+#     .env, .git, vendor, storage and the application source out of HTTP
+#     reach while the whole project is exposed as the document root.
+# -----------------------------------------------------------------------------
+
+<IfModule mod_rewrite.c>
+    Options -MultiViews -Indexes
+
+    DirectoryIndex index.php index.html
+
+    RewriteEngine On
+
+    # --------------------------------------------------------------------------
+    # 1. Hard-deny sensitive targets BEFORE anything else can match.
+    #    /.well-known stays open so AutoSSL / Let's Encrypt webroot
+    #    challenges can write into it.
+    # --------------------------------------------------------------------------
+    # Any dot-file or dot-directory (.env, .git, .github, .htaccess, ...).
+    RewriteCond %{REQUEST_URI} !^/\.well-known [NC]
+    RewriteRule ^\. - [F,L]
+
+    # Laravel / project internals that must never be served over HTTP.
+    RewriteRule ^(app|bootstrap|config|database|resources|routes|tests)(/|$) - [F,L]
+    RewriteRule ^vendor(/|$) - [F,L]
+    RewriteRule ^templates(/|$) - [F,L]
+
+    # The public/ tree is only reachable through the internal rewrites below.
+    RewriteRule ^public(/|$) - [F,L]
+
+    # Executables, manifests, lock files, dumps and tooling configuration.
+    RewriteRule ^(artisan|composer\.json|composer\.lock|package\.json|package-lock\.json|yarn\.lock|pnpm-lock\.yaml|phpunit\.xml|vite\.config\.js|ebs\.sql)(/|$)? - [F,L]
+
+    # Any stray dump/log/backup file anywhere in the web root.
+    RewriteCond %{REQUEST_URI} \.(sql|log|bak|old|swp|key|env)$ [NC]
+    RewriteRule . - [F,L]
+
+    # --------------------------------------------------------------------------
+    # 2. Route the public assets that Laravel emits WITHOUT a /public prefix.
+    #    /storage/* is handed to the public/storage symlink (public disk only),
+    #    so cover images load while private storage stays unreachable.
+    # --------------------------------------------------------------------------
+    RewriteRule ^assets/(.*)$ public/assets/$1 [L]
+    RewriteRule ^storage/(.*)$ public/storage/$1 [L]
+    RewriteRule ^(favicon\.ico|robots\.txt)$ public/$1 [L]
+
+    # --------------------------------------------------------------------------
+    # 3. Optional canonical HTTPS redirect. Keep this commented out if the host
+    #    already forces HTTPS at the domain level (cPanel "Force HTTPS", AutoSSL
+    #    redirect, or an existing domain redirect) - enabling both causes a loop.
+    # --------------------------------------------------------------------------
+    # RewriteCond %{HTTPS} off
+    # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # Pass Authorization / XSRF headers through to the front controller.
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+    RewriteCond %{HTTP:x-xsrf-token} .
+    RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
+
+    # Remove a trailing slash from anything that is not a real directory.
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # --------------------------------------------------------------------------
+    # 4. Front controller: everything else goes through the root index.php
+    #    loader, which boots the real Laravel entry point.
+    # --------------------------------------------------------------------------
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+<IfModule mod_autoindex.c>
+    Options -Indexes
+</IfModule>
