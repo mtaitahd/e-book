@@ -13,9 +13,9 @@
                 &#9776;
             </button>
 
-            <a class="ebs-logo" href="{{ route('home') }}" aria-label="E-Book home">
-                <img src="{{ asset('assets/e_book-removebg-preview.png') }}" alt="E-Book" width="28" height="28" loading="lazy">
-                <span>e-books &amp; PDF</span>
+            <a class="ebs-logo" href="{{ route('home') }}" aria-label="GajokiBooks home">
+                <img src="{{ asset('assets/e_book-removebg-preview.png') }}" alt="GajokiBooks" width="28" height="28" loading="lazy">
+                <span>GajokiBooks</span>
             </a>
 
             <nav class="ebs-topnav" aria-label="Primary">
@@ -186,9 +186,9 @@
     {{-- ===================== Categories side drawer ===================== --}}
     <div class="ebs-drawer" id="ebsDrawer" tabindex="-1" role="dialog" aria-modal="true" aria-label="Store navigation" aria-hidden="true">
         <div class="ebs-drawer__head">
-            <a class="ebs-drawer__logo" href="{{ route('home') }}" aria-label="E-Book home">
-                <img src="{{ asset('assets/e_book-removebg-preview.png') }}" alt="E-Book" width="22" height="22" loading="lazy">
-                <span>e-books &amp; PDF</span>
+            <a class="ebs-drawer__logo" href="{{ route('home') }}" aria-label="GajokiBooks home">
+                <img src="{{ asset('assets/e_book-removebg-preview.png') }}" alt="GajokiBooks" width="22" height="22" loading="lazy">
+                <span>GajokiBooks</span>
             </a>
             <button
                 type="button"
