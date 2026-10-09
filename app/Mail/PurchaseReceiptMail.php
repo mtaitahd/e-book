@@ -42,6 +42,7 @@ class PurchaseReceiptMail extends Mailable
 
         return new Content(
             view: 'emails.purchase-receipt',
+            text: 'emails.purchase-receipt-text',
             with: [
                 'customerName' => ReceiptFormatter::customerName($order),
                 'orderNumber' => (string) $order->order_number,

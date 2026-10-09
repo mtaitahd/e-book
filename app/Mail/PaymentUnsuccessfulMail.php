@@ -40,6 +40,7 @@ class PaymentUnsuccessfulMail extends Mailable
 
         return new Content(
             view: 'emails.payment-unsuccessful',
+            text: 'emails.payment-unsuccessful-text',
             with: [
                 'customerName' => ReceiptFormatter::customerName($order),
                 'orderNumber' => (string) $order->order_number,
