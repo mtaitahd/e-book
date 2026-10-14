@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Admin') | E-Book Admin</title>
+    <link rel="icon" type="image/png" href="{{ asset('assets/e_book-removebg-preview.png?v=20261005') }}">
+    <link rel="apple-touch-icon" href="{{ asset('assets/e_book-removebg-preview.png?v=20261005') }}">
     <link rel="stylesheet" href="{{ asset('assets/storefront/css/fonts.css') }}">
     <link href="{{ asset('assets/admin/vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/admin/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
