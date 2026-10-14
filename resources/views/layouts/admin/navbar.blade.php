@@ -10,11 +10,20 @@
     <ul class="navbar-nav ml-auto">
         <li class="nav-item dropdown no-arrow">
             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <div class="img-profile rounded-circle bg-secondary" style="width: 32px; height: 32px; display: inline-block;"></div>
+                @if(auth()->user()->avatar)
+                    <img src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="{{ auth()->user()->name }}"
+                         class="img-profile rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
+                @else
+                    <div class="img-profile rounded-circle bg-secondary" style="width: 32px; height: 32px; display: inline-block;"></div>
+                @endif
                 <span class="ml-2 d-none d-lg-inline text-white small">{{ auth()->user()->name }}</span>
             </a>
             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
                 <span class="dropdown-item-text small text-gray-500">Signed in as {{ auth()->user()->role }}</span>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="{{ route('admin.profile.edit') }}">
+                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i> My Profile
+                </a>
                 <div class="dropdown-divider"></div>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf

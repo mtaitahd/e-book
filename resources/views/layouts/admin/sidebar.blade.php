@@ -104,6 +104,14 @@
         </a>
     </li>
 
+    {{-- The administrator's own account: name, email, password and photo. --}}
+    <li class="nav-item {{ request()->routeIs('admin.profile.*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('admin.profile.edit') }}">
+            <i class="fas fa-fw fa-user-cog"></i>
+            <span>My Profile</span>
+        </a>
+    </li>
+
     <hr class="sidebar-divider">
     <div class="sidebar-heading">Web</div>
     <li class="nav-item">

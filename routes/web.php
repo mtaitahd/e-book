@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PaymentSettingsController;
+use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\SalesReportController;
 use App\Http\Controllers\Admin\SubscriberController;
 use App\Http\Controllers\Admin\WalletController;
@@ -131,6 +132,12 @@ Route::prefix('{order}/payment')->name('payments.')->group(function () {
     // Admin area: every route requires authentication + the admin role.
     Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+        // The signed-in administrator manages their own account here: name,
+        // email, phone, password and profile photo. Deliberately self-only --
+        // the controller reads the account from the session, never the request.
+        Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
 
         Route::resource('books', BookController::class)->only([
             'index', 'create', 'store', 'edit', 'update', 'destroy',
