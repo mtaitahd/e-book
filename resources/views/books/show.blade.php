@@ -99,7 +99,7 @@
                             </a>
                         @endif
 
-                        @if($book->hasPdfFile())
+                        @if($book->hasDownloadFile())
                             <a class="btn btn--secondary btn--block" href="{{ route('account.purchases.download', $owned) }}">Download</a>
                         @elseif(! $book->hasOnlineReading())
                             <span class="btn btn--disabled btn--block" title="No file uploaded yet">Download</span>

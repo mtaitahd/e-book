@@ -72,18 +72,18 @@
                     <a class="btn btn--primary btn--block" href="{{ route('account.purchases.read', $purchase) }}">
                         {{ $book->hasOnlineReading() ? 'Read online' : 'Read now' }}
                     </a>
-                @else
+                @elseif($book->format() !== \App\Models\Book::FORMAT_AUDIO)
                     <span class="btn btn--disabled btn--block" title="No file uploaded yet">Read now</span>
                 @endif
 
-                @if($book->hasPdfFile())
+                @if($book->hasDownloadFile())
                     <a class="btn btn--secondary btn--block" href="{{ route('account.purchases.download', $purchase) }}">Download now</a>
                 @elseif(! $book->hasOnlineReading())
                     <span class="btn btn--disabled btn--block" title="No file uploaded yet">Download</span>
                 @endif
             </div>
 
-            @if(! $book->hasOnlineReading() && ! $book->hasPdfFile())
+            @if(! $book->hasOnlineReading() && ! $book->hasDownloadFile())
                 <p class="buybox__note">This book is not available for reading yet. Please contact support.</p>
             @endif
             <p class="buybox__note">Digital e-book with lifetime access.</p>

@@ -229,6 +229,8 @@ Route::prefix('{order}/payment')->name('payments.')->group(function () {
         // is a POST under the existing auth + admin middleware and the CSRF
         // field, matching how the rest of the admin area is protected.
         Route::prefix('settings')->name('settings.')->group(function () {
+            Route::get('/social', [\App\Http\Controllers\Admin\SocialLinksController::class, 'index'])->name('social');
+            Route::post('/social', [\App\Http\Controllers\Admin\SocialLinksController::class, 'update'])->name('social.update');
             Route::get('/payments', [PaymentSettingsController::class, 'index'])->name('payments');
             Route::post('/payments', [PaymentSettingsController::class, 'update'])->name('payments.update');
             Route::post('/payments/connection', [PaymentSettingsController::class, 'testConnection'])

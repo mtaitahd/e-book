@@ -37,11 +37,11 @@
                                 <a class="btn btn--primary btn--sm" href="{{ route('account.purchases.read', $purchase) }}">
                                     {{ $book->hasOnlineReading() ? 'Read online' : 'Read Now' }}
                                 </a>
-                            @else
+                            @elseif($book->format() !== \App\Models\Book::FORMAT_AUDIO)
                                 <span class="btn-disabled" title="This book is not available for reading yet">Read Now</span>
                             @endif
                             <a class="btn btn--secondary btn--sm" href="{{ route('account.purchases.show', $purchase) }}">View Book</a>
-                            @if($book->hasPdfFile())
+                            @if($book->hasDownloadFile())
                                 <a class="btn btn--secondary btn--sm" href="{{ route('account.purchases.download', $purchase) }}">Download</a>
                             @elseif($book->hasOnlineReading())
                                 <span class="library-card__meta">{{ $book->formatLabel() }}</span>

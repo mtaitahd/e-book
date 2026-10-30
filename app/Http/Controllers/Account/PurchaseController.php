@@ -304,6 +304,10 @@ class PurchaseController extends Controller
         }
 
         $mime ??= match (strtolower((string) $book->file_type)) {
+            'mp3' => 'audio/mpeg',
+            'm4a' => 'audio/mp4',
+            'wav' => 'audio/wav',
+            'ogg' => 'audio/ogg',
             'epub' => 'application/epub+zip',
             'mobi' => 'application/x-mobipocket-ebook',
             default => 'application/pdf',

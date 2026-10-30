@@ -48,7 +48,7 @@ class BookRequest extends FormRequest
             'type' => ['nullable', Rule::in(Book::TYPES)],
             'book_format' => ['nullable', Rule::in(Book::FORMATS)],
             'ebook_file' => $this->fileRules(),
-            'file_type' => ['nullable', 'string', Rule::in(['pdf', 'epub', 'mobi'])],
+            'file_type' => ['nullable', 'string', Rule::in(['pdf', 'epub', 'mobi', 'mp3', 'm4a', 'wav', 'ogg'])],
             'confirm_type_change' => ['nullable', 'boolean'],
             'publisher' => ['nullable', 'string', 'max:255'],
             'published_at' => ['nullable', 'date'],
@@ -76,6 +76,11 @@ class BookRequest extends FormRequest
     {
         $type = $this->submittedType();
 
+        if ($type === Book::TYPE_AUDIO) {
+            $book = $this->route('book');
+            $required = ! $book instanceof Book || $book->type() !== Book::TYPE_AUDIO || empty($book->file_path);
+            return [$required ? 'required' : 'nullable', 'file', 'mimes:mp3,m4a,wav,ogg', 'max:204800'];
+        }
         if ($type === Book::TYPE_EBOOK) {
             return ['prohibited'];
         }
@@ -106,7 +111,7 @@ class BookRequest extends FormRequest
         }
 
         return $this->submittedType() !== $book->type()
-            && ($book->file_path === null || $book->file_path === '');
+            && ($book->type() === Book::TYPE_AUDIO || $book->file_path === null || $book->file_path === '');
     }
 
     /**
@@ -209,7 +214,7 @@ class BookRequest extends FormRequest
                 }
             }
 
-            return $type === Book::TYPE_EBOOK ? Book::FORMAT_ONLINE : Book::FORMAT_PDF;
+            return match ($type) { Book::TYPE_EBOOK => Book::FORMAT_ONLINE, Book::TYPE_AUDIO => Book::FORMAT_AUDIO, default => Book::FORMAT_PDF };
         }
 
         $format = $this->input('book_format');
@@ -272,10 +277,10 @@ class BookRequest extends FormRequest
             'cover_image.image' => 'The cover must be a valid image file.',
             'cover_image.mimes' => 'The cover must be a JPG, PNG or WebP image.',
             'cover_image.max' => 'The cover must not be larger than 2 MB.',
-            'ebook_file.max' => 'The digital file must not be larger than 10 MB.',
+            'ebook_file.max' => $this->submittedType() === Book::TYPE_AUDIO ? 'The audio file must not be larger than 200 MB.' : 'The digital file must not be larger than 10 MB.',
             'ebook_file.prohibited' => 'An E-Book is written chapter by chapter and does not use an uploaded file. Remove it, or create the book as a PDF instead.',
             'book_format.in' => 'Choose PDF, Online or PDF & Online.',
-            'type.in' => 'Choose either E-Book or PDF.',
+            'type.in' => 'Choose E-Book, PDF or Audio Book.',
             'pricing_type.in' => 'Choose whether this book is free or paid.',
             'price.required' => 'Enter the price of this book.',
             'price.numeric' => 'The price must be a number.',
@@ -286,6 +291,8 @@ class BookRequest extends FormRequest
         if ($this->submittedType() === Book::TYPE_PDF) {
             $messages['ebook_file.required'] = 'Upload the complete PDF of this book.';
             $messages['ebook_file.mimes'] = 'The uploaded file must be a PDF.';
+        } elseif ($this->submittedType() === Book::TYPE_AUDIO) {
+            $messages['ebook_file.mimes'] = 'Upload an MP3, M4A, WAV or OGG audio file.';
         } else {
             $messages['ebook_file.mimes'] = 'The digital file must be a PDF, EPUB or MOBI.';
         }

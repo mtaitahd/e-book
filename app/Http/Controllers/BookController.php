@@ -34,7 +34,7 @@ class BookController extends Controller
         }
 
         if ($format = strtolower(trim((string) $request->query('format')))) {
-            if (in_array($format, ['pdf', 'epub', 'mobi'], true)) {
+            if (in_array($format, ['pdf', 'epub', 'mobi', 'mp3', 'm4a', 'wav', 'ogg'], true)) {
                 $query->where('file_type', $format);
             }
         }

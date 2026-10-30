@@ -26,6 +26,7 @@ class Book extends Model
     ];
 
     /** A downloadable PDF read through the bundled PDF.js reader. */
+    public const FORMAT_AUDIO = 'audio';
     public const FORMAT_PDF = 'pdf';
 
     /** A native HTML/rich-text e-book read chapter by chapter in the browser. */
@@ -35,12 +36,14 @@ class Book extends Model
     public const FORMAT_BOTH = 'both';
 
     public const FORMATS = [
+        self::FORMAT_AUDIO,
         self::FORMAT_PDF,
         self::FORMAT_ONLINE,
         self::FORMAT_BOTH,
     ];
 
     public const FORMAT_LABELS = [
+        self::FORMAT_AUDIO => 'Audio Book',
         self::FORMAT_PDF => 'PDF',
         self::FORMAT_ONLINE => 'Online',
         self::FORMAT_BOTH => 'PDF & Online',
@@ -53,14 +56,17 @@ class Book extends Model
     public const TYPE_EBOOK = 'ebook';
 
     /** A single uploaded PDF read through the protected PDF.js reader. */
+    public const TYPE_AUDIO = 'audio';
     public const TYPE_PDF = 'pdf';
 
     public const TYPES = [
+        self::TYPE_AUDIO,
         self::TYPE_EBOOK,
         self::TYPE_PDF,
     ];
 
     public const TYPE_LABELS = [
+        self::TYPE_AUDIO => 'Audio Book',
         self::TYPE_EBOOK => 'E-Book',
         self::TYPE_PDF => 'PDF',
     ];
@@ -129,7 +135,7 @@ class Book extends Model
             if ($typeGiven && ! $formatGiven && in_array($namedType, self::TYPES, true)) {
                 $book->book_format = $namedType === self::TYPE_EBOOK
                     ? self::FORMAT_ONLINE
-                    : self::FORMAT_PDF;
+                    : ($namedType === self::TYPE_AUDIO ? self::FORMAT_AUDIO : self::FORMAT_PDF);
             }
 
             // Only the ambiguous legacy `both` format has to ask the database
@@ -233,6 +239,7 @@ class Book extends Model
         $format = strtolower(trim($format));
 
         return match ($format) {
+            self::FORMAT_AUDIO => self::TYPE_AUDIO,
             self::FORMAT_ONLINE => self::TYPE_EBOOK,
             self::FORMAT_BOTH => $hasChapters ? self::TYPE_EBOOK : self::TYPE_PDF,
             default => self::TYPE_PDF,
@@ -308,6 +315,11 @@ class Book extends Model
     /**
      * Whether a PDF file is attached and the format permits downloading it.
      */
+    public function hasDownloadFile(): bool
+    {
+        return ($this->hasPdfFile() || $this->format() === self::FORMAT_AUDIO) && ! empty($this->file_path);
+    }
+
     public function hasPdfFile(): bool
     {
         return $this->isPdfFormat()

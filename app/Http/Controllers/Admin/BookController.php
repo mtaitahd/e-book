@@ -77,8 +77,8 @@ class BookController extends Controller
         if ($request->hasFile('ebook_file')) {
             $file = $request->file('ebook_file');
             $filePath = $file->store('ebooks', 'local');
-            $fileType = $request->input('file_type')
-                ?? strtolower($file->guessExtension() ?: $file->getClientOriginalExtension());
+            $fileType = ($type === Book::TYPE_AUDIO ? null : $request->input('file_type'))
+                ?? strtolower($type === Book::TYPE_AUDIO ? $file->getClientOriginalExtension() : ($file->guessExtension() ?: $file->getClientOriginalExtension()));
         }
 
         // The type pins the file's meaning: a PDF book's file is always a
@@ -213,7 +213,7 @@ class BookController extends Controller
             }
             $file = $request->file('ebook_file');
             $filePath = $file->store('ebooks', 'local');
-            $fileType = $request->input('file_type') ?? strtolower($file->guessExtension() ?: $file->getClientOriginalExtension());
+            $fileType = ($type === Book::TYPE_AUDIO ? null : $request->input('file_type')) ?? strtolower($type === Book::TYPE_AUDIO ? $file->getClientOriginalExtension() : ($file->guessExtension() ?: $file->getClientOriginalExtension()));
         }
 
         if ($type === Book::TYPE_PDF && $filePath !== null && $filePath !== '') {

@@ -56,7 +56,7 @@
         var root = scope || document;
         var type = selectedType(root);
         var original = originalType(root);
-        var changed = !!original && type !== original && (type === TYPE_EBOOK || type === TYPE_PDF);
+        var changed = !!original && type !== original && (type === TYPE_EBOOK || type === TYPE_PDF || type === 'audio');
 
         root.querySelectorAll(CHOICE).forEach(function (choice) {
             var label = choice.closest('.book-type-option');
@@ -66,7 +66,7 @@
         });
 
         root.querySelectorAll(BLOCK).forEach(function (block) {
-            block.hidden = block.getAttribute('data-book-type-block') !== type;
+            block.hidden = block.getAttribute('data-book-type-block').split(' ').indexOf(type) === -1;
         });
 
         var confirm = root.querySelector(CONFIRM);
@@ -83,6 +83,7 @@
 
         var file = root.querySelector(FILE);
         if (file) {
+            file.accept = type === 'audio' ? '.mp3,.m4a,.wav,.ogg' : 'application/pdf';
             if (type === TYPE_EBOOK) {
                 file.value = '';
                 file.required = false;
@@ -90,7 +91,7 @@
                 // A new PDF book needs one now; an existing one only when the
                 // type has just changed to PDF and nothing is stored yet.
                 file.required = fileValue(root, 'data-book-pdf-create') ||
-                    (changed && !fileValue(root, 'data-book-pdf-existing'));
+                    (changed && (type === 'audio' || original === 'audio' || !fileValue(root, 'data-book-pdf-existing')));
             }
         }
     }

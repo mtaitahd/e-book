@@ -30,6 +30,7 @@
         'hours'    => 'Mon – Fri: 8:00 AM – 6:00 PM',
     ];
 
+    $socialLinks = \App\Models\SocialLink::pluck('url', 'platform');
     $footerCategories = collect($navCategories ?? [])->take(6);
 @endphp
 
@@ -164,11 +165,21 @@
             <div class="ebs-footer-col ebs-footer-col--social" aria-labelledby="ebsFooterSocialTitle">
                 <h2 class="ebs-footer-col__title" id="ebsFooterSocialTitle">Follow Us</h2>
                 <ul class="ebs-footer__social">
-                    <li><a class="ebs-footer__social-link" href="#" aria-label="E-Book on Facebook"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true" focusable="false"><path d="M13.5 21v-8h2.7l.4-3.2h-3.1V7.8c0-.9.3-1.5 1.6-1.5h1.6V3.4c-.3 0-1.2-.1-2.3-.1-2.4 0-4 1.4-4 4v2.5H7.5V13h2.9v8h3.1z"/></svg></a></li>
-                    <li><a class="ebs-footer__social-link" href="#" aria-label="E-Book on X"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true" focusable="false"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l5.164 6.931zm-1.161 17.52h1.833L7.084 4.126H5.117l11.966 15.644z"/></svg></a></li>
-                    <li><a class="ebs-footer__social-link" href="#" aria-label="E-Book on Instagram"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="5.2" stroke="currentColor" stroke-width="1.9"/><circle cx="12" cy="12" r="4.1" stroke="currentColor" stroke-width="1.9"/><circle cx="17.2" cy="6.8" r="1.3" fill="currentColor"/></svg></a></li>
-                    <li><a class="ebs-footer__social-link" href="#" aria-label="E-Book on YouTube"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true" focusable="false"><rect x="2.5" y="5.5" width="19" height="13" rx="4" stroke="currentColor" stroke-width="1.9"/><path d="M10.4 9.2v5.6l5-2.8-5-2.8z" fill="currentColor"/></svg></a></li>
-                    <li><a class="ebs-footer__social-link" href="#" aria-label="E-Book on LinkedIn"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="3.4" stroke="currentColor" stroke-width="1.9"/><circle cx="7.4" cy="7.9" r="1.35" fill="currentColor"/><path d="M6.2 10.1h2.4v7.2H6.2zM10.2 10.1h2.3v1a2.6 2.6 0 0 1 2.2-1.1c2 0 3 1.3 3 3.5v3.8h-2.4v-3.4c0-1-.4-1.6-1.3-1.6s-1.4.6-1.4 1.7v3.3h-2.4z" fill="currentColor"/></svg></a></li>
+                    @if(!empty($socialLinks['facebook']))
+                    <li><a class="ebs-footer__social-link" href="{{ $socialLinks['facebook'] }}" target="_blank" rel="noopener noreferrer" aria-label="E-Book on Facebook"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true" focusable="false"><path d="M13.5 21v-8h2.7l.4-3.2h-3.1V7.8c0-.9.3-1.5 1.6-1.5h1.6V3.4c-.3 0-1.2-.1-2.3-.1-2.4 0-4 1.4-4 4v2.5H7.5V13h2.9v8h3.1z"/></svg></a></li>
+                    @endif
+                    @if(!empty($socialLinks['x']))
+                    <li><a class="ebs-footer__social-link" href="{{ $socialLinks['x'] }}" target="_blank" rel="noopener noreferrer" aria-label="E-Book on X"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true" focusable="false"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l5.164 6.931zm-1.161 17.52h1.833L7.084 4.126H5.117l11.966 15.644z"/></svg></a></li>
+                    @endif
+                    @if(!empty($socialLinks['instagram']))
+                    <li><a class="ebs-footer__social-link" href="{{ $socialLinks['instagram'] }}" target="_blank" rel="noopener noreferrer" aria-label="E-Book on Instagram"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="5.2" stroke="currentColor" stroke-width="1.9"/><circle cx="12" cy="12" r="4.1" stroke="currentColor" stroke-width="1.9"/><circle cx="17.2" cy="6.8" r="1.3" fill="currentColor"/></svg></a></li>
+                    @endif
+                    @if(!empty($socialLinks['youtube']))
+                    <li><a class="ebs-footer__social-link" href="{{ $socialLinks['youtube'] }}" target="_blank" rel="noopener noreferrer" aria-label="E-Book on YouTube"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true" focusable="false"><rect x="2.5" y="5.5" width="19" height="13" rx="4" stroke="currentColor" stroke-width="1.9"/><path d="M10.4 9.2v5.6l5-2.8-5-2.8z" fill="currentColor"/></svg></a></li>
+                    @endif
+                    @if(!empty($socialLinks['linkedin']))
+                    <li><a class="ebs-footer__social-link" href="{{ $socialLinks['linkedin'] }}" target="_blank" rel="noopener noreferrer" aria-label="E-Book on LinkedIn"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="3.4" stroke="currentColor" stroke-width="1.9"/><circle cx="7.4" cy="7.9" r="1.35" fill="currentColor"/><path d="M6.2 10.1h2.4v7.2H6.2zM10.2 10.1h2.3v1a2.6 2.6 0 0 1 2.2-1.1c2 0 3 1.3 3 3.5v3.8h-2.4v-3.4c0-1-.4-1.6-1.3-1.6s-1.4.6-1.4 1.7v3.3h-2.4z" fill="currentColor"/></svg></a></li>
+                    @endif
                 </ul>
             </div>
         </div>

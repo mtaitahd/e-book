@@ -60,6 +60,11 @@
             <span class="bt-desc">Chapter by chapter content, read in the 3D book reader. No file upload.</span>
         </label>
 
+        <label class="book-type-option" for="type_audio">
+            <input type="radio" name="type" id="type_audio" value="audio" data-book-type-choice {{ $typeValue === 'audio' ? 'checked' : '' }}>
+            <span class="bt-title"><i class="fas fa-headphones mr-1"></i>Audio Book</span>
+            <span class="bt-desc">Audio with a cover and description, downloaded after purchase.</span>
+        </label>
         <label class="book-type-option" for="type_pdf">
             <input type="radio" name="type" id="type_pdf" value="{{ \App\Models\Book::TYPE_PDF }}"
                    data-book-type-choice {{ $typeValue === \App\Models\Book::TYPE_PDF ? 'checked' : '' }}>
@@ -267,38 +272,38 @@
 {{-- ---------------------------------------------------------------
      PDF only: the file that becomes the whole book.
      --------------------------------------------------------------- --}}
-<div data-book-type-block="pdf" {{ $typeValue !== \App\Models\Book::TYPE_PDF ? 'hidden' : '' }}>
+<div data-book-type-block="pdf audio" {{ ! in_array($typeValue, ['pdf', 'audio']) ? 'hidden' : '' }}>
     <hr>
     <h6 class="text-muted small text-uppercase mb-3"><i class="fas fa-file-pdf mr-1"></i>Book file</h6>
 
     <div class="form-group">
         <label for="ebook_file">
-            {{ $isEdit && $book?->file_path ? 'Replace PDF' : 'PDF upload' }}
+            {{ $isEdit && $book?->file_path ? 'Replace file' : 'Book file upload' }}
             {{ $isEdit && $book?->file_path ? '' : '<span class="text-danger">*</span>' }}
         </label>
 
         @if($isEdit && $book?->file_path)
             <div class="alert alert-success py-2 mb-2">
                 <i class="fas fa-file-pdf mr-1"></i>
-                Current PDF: <strong>{{ basename($book->file_path) }}</strong>
+                {{ $typeValue === 'audio' ? 'Current audio:' : 'Current PDF:' }} <strong>{{ basename($book->file_path) }}</strong>
                 <span class="small text-muted">(stored privately &mdash; leave empty to keep it)</span>
             </div>
         @elseif($isEdit)
             <div class="alert alert-warning py-2 mb-2">
                 <i class="fas fa-exclamation-triangle mr-1"></i>
-                No PDF uploaded yet. This book cannot be read or downloaded until one is added.
+                No file uploaded yet. Add the book file to make it available.
             </div>
         @endif
 
         <div class="custom-file">
             <input type="file" name="ebook_file" id="ebook_file"
                    class="custom-file-input {{ $errors->has('ebook_file') ? 'is-invalid' : '' }}"
-                   accept="application/pdf"
+                   accept="{{ $typeValue === 'audio' ? '.mp3,.m4a,.wav,.ogg' : 'application/pdf' }}"
                    data-book-pdf-file
                    data-book-pdf-create="{{ $isEdit ? '0' : '1' }}"
                    data-book-pdf-existing="{{ ($isEdit && $book?->file_path) ? '1' : '0' }}"
                    {{ $isEdit ? '' : 'required' }}>
-            <label class="custom-file-label" for="ebook_file">One complete PDF &mdash; max 10 MB, stored privately</label>
+            <label class="custom-file-label" for="ebook_file">PDF: max 10 MB. Audio (MP3, M4A, WAV, OGG): max 200 MB. Stored privately</label>
         </div>
         @error('ebook_file')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
     </div>
@@ -310,7 +315,7 @@
                 <option value="{{ $type }}" {{ $fileTypeValue === $type ? 'selected' : '' }}>{{ strtoupper($type) }}</option>
             @endforeach
         </select>
-        <small class="form-text text-muted">PDF books always store a PDF.</small>
+        <small class="form-text text-muted">Audio file type is detected from the uploaded file. PDF books always store a PDF.</small>
         @error('file_type')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
 </div>

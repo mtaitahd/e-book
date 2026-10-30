@@ -88,6 +88,9 @@
 
     <hr class="sidebar-divider">
     <div class="sidebar-heading">Settings</div>
+    <li class="nav-item {{ request()->routeIs('admin.settings.social*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('admin.settings.social') }}"><i class="fas fa-fw fa-share-alt"></i><span>Social Media Links</span></a>
+    </li>
 
     {{-- Stage 10.1: read-only view of the payment provider configuration. --}}
     <li class="nav-item {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
